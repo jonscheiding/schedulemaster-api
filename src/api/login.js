@@ -2,7 +2,7 @@ import express from 'express'
 import request from 'request'
 import url from 'url'
 
-import { stringify, parse } from '../token.js'
+import { stringify, parse } from 'token'
 
 const api = express.Router()
 export default api

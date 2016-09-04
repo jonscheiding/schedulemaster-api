@@ -2,7 +2,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import bearerToken from 'express-bearer-token'
 
-import api from './api'
+import api from 'api'
 
 const app = express()
 app.use(bodyParser.json())
