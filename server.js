@@ -1,8 +1,13 @@
 import express from 'express'
 import request from 'request'
+import cheerio from 'cheerio'
 import base64 from 'base-64'
 import bodyParser from 'body-parser'
 import bearerToken from 'express-bearer-token'
+import url from 'url'
+import encrypter from 'object-encrypter'
+
+const enc = encrypter('secret', {ttl: false})
 
 const app = express()
 
@@ -10,9 +15,9 @@ app.use(bodyParser.json())
 app.use(bearerToken())
 
 app.post('/token', (req, res) => {
-  request(
+  request.post(
+    'https://my.schedulemaster.com/login.asp',
     {
-      url: 'https://my.schedulemaster.com/login.asp',
       form: {
         USERID: req.body.user,
         DATA: req.body.password,
@@ -21,20 +26,24 @@ app.post('/token', (req, res) => {
       followRedirect: false
     },
     (error, response) => {
-      res.send({
-        token: base64.encode(response.headers['set-cookie'])
-      })
+      const redirectUrl = url.parse(response.headers['location'], true)
+      console.log(redirectUrl)
+      const token = {
+        cookie: response.headers['set-cookie'],
+        userid: redirectUrl.query.userid,
+        session: redirectUrl.query.session
+      }
+      
+      res.send({ token: enc.encrypt(token) })
     }
   )
 })
 
-app.get('/test', (req, res) => {
+app.get('/user', (req, res) => {
+  const token = enc.decrypt(req.token)
   request(
     {
-      url: 'https://my.schedulemaster.com/SCHDATA.asp?USERID=63552&SESSION=19640025&INITIAL=YES&DISPLAY=GRID1&refr=0&resrequest=&LS=365&TD=N&FR=Y',
-      headers: {
-        'Cookie': base64.decode(req.token)
-      }
+      url: 'https://my.schedulemaster.com/UserInfo.aspx?userid=' + token.userid + '&session=' + token.session
     },
     (error, response, html) => res.send(html)
   )
