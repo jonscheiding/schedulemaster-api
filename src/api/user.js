@@ -5,10 +5,9 @@ const api = express.Router()
 export default api
 
 api.get('/user', (req, res) => {
-  userInfo(req.token).get().then(result => res.send(result))
+  res.promise(userInfo(req.token).get())
 })
 
 api.put('/user', (req, res) => {
-  userInfo(req.token).post(req.body).then(result => res.send(result))
-    .catch(console.log)
+  res.promise(userInfo(req.token).post(req.body))
 })
