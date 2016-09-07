@@ -1,4 +1,5 @@
 import $ from 'cheerio'
+import { makeConverter } from 'json-mapper'
 
 export const stripDownAspnetIdentifier = identifier => {
   if(!identifier) return identifier
@@ -7,10 +8,10 @@ export const stripDownAspnetIdentifier = identifier => {
   return identifier.substring(lastIndex + 1)
 }
 
-export const parseForm = parentSelector => {
+export const parseForm = $ => {
   const data = {}
   
-  parentSelector.find('input, textarea, select').each((i, input) => {
+  $('input, textarea, select').each((i, input) => {
     const value = $(input).attr('type') == 'checkbox'
       ? $(input).is(':checked')
       : $(input).val()
@@ -21,4 +22,28 @@ export const parseForm = parentSelector => {
   })
   
   return data
+}
+
+export const deparseForm = ($, data) => {
+  const mapping = {}
+  
+  $('input, textarea, select').each((i, input) => {
+    const name = $(input).attr('name')
+    const strippedName = stripDownAspnetIdentifier(name)
+    mapping[name] = [
+      strippedName,
+      value => {
+        switch($(input).attr('type')) {
+        case 'checkbox':
+          return value ? $(input).val() : null
+        }
+        return value
+      }
+    ]
+  })
+  
+  return {
+    ...parseForm($),
+    ...makeConverter(mapping)(data)
+  }
 }

@@ -4,8 +4,8 @@ import url from 'url'
 
 const isSuccessStatusCode = statusCode => statusCode >= 200 && statusCode < 300
 
-const scrapeRequest = options => new Promise(
-  (resolve, reject) => 
+const executeRequest = options => new Promise(
+  (resolve, reject) => {
     request(options, (error, response, html) => {
       if(error) return reject(error)
       if(!isSuccessStatusCode(response.statusCode))
@@ -15,6 +15,7 @@ const scrapeRequest = options => new Promise(
       
       resolve({$, response})
     })
+  }
 )
 
 const addQueryToUrl = (parsedUrl, query) => (
@@ -28,16 +29,22 @@ const addQueryToUrl = (parsedUrl, query) => (
   }
 )
 
-const createScraper = (urlStr, promiseFn) => token => {
+const createScraper = (urlStr, builder = methods => methods) => token => {
   const parsedUrl = addQueryToUrl(url.parse(urlStr, true), token)
-  const options = {
-    method: 'GET',
-    uri: url.format(parsedUrl)    
-  }
   
-  return promiseFn(scrapeRequest(options)).catch(err => {
-    console.log(err)
-    return Promise.reject(err)
+  const request = (options) => {
+    options = {...options, uri: url.format(parsedUrl)}
+    
+    return executeRequest(options)
+      .catch(err => {
+        console.log(err)
+        return Promise.reject(err)
+      })
+  }
+    
+  return builder({
+    get: () => request({method: 'GET'}),
+    post: (form) => request({method: 'POST', form: form})
   })
 }
 
