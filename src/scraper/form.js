@@ -36,6 +36,11 @@ const form = $ => {
     const strippedName = stripDownAspnetIdentifier(name)
     const value = convertFromFormValue($(input))
 
+    if($(input).attr('type') == 'submit') {
+      submits[strippedName] = { [name]: value }
+      return
+    }
+
     initialData[name] = value
     if(strippedName) parsedData[strippedName] = value
     mapping[name] = [
@@ -50,7 +55,8 @@ const form = $ => {
     data: parsedData,
     prepare: (updatedData, submitName) => ({
       ...initialData,
-      ...converter(updatedData)
+      ...converter(updatedData),
+      ...submits[submitName]
     })
   }
 }
