@@ -1,11 +1,11 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import bearerToken from 'express-bearer-token'
+import { middleware as tokenMiddleware } from 'token'
 
 import api from 'api'
 
 const app = express()
 app.use(bodyParser.json())
-app.use(bearerToken())
+app.use(tokenMiddleware())
 app.use(api)
 app.listen(3000)

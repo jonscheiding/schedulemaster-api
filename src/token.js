@@ -1,4 +1,5 @@
 import { cleanEnv, str } from 'envalid'
+import expressBearerToken from 'express-bearer-token'
 import createEncrypter from 'object-encrypter'
 import yup from 'yup'
 
@@ -15,6 +16,8 @@ const validate = token => tokenSchema
   .catch(err => Promise.reject(err.errors.join(', ')))
 
 export const parse = tokenStr => {
+  if(!tokenStr) return Promise.resolve(null)
+  
   let token
   try {
     token = encrypter.decrypt(tokenStr)
@@ -31,4 +34,15 @@ export const parse = tokenStr => {
 
 export const stringify = token => {
   return validate(token).then(encrypter.encrypt)
+}
+
+export const middleware = () => (req, res, next) => {
+  expressBearerToken()(req, res, () => {
+    parse(req.token)
+      .then(parsedToken => {
+        req.token = parsedToken
+        next()
+      })
+      .catch(err => res.status(401).send({error: err.toString()}))
+  })
 }

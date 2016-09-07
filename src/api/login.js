@@ -38,14 +38,4 @@ api.post('/login', (req, res) => {
   })
 })
 
-api.get('/checkToken', (req, res) => {
-  parse(req.token)
-    .then(token => {
-      console.log(token)
-      res.status(200).end()
-    })
-    .catch(error => {
-      console.log(error)
-      res.status(401).send({message: error.toString()})
-    })
-})
+api.get('/checkToken', (req, res) => res.send(req.token))
