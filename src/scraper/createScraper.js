@@ -2,11 +2,12 @@ import request from 'request'
 import cheerio from 'cheerio'
 import url from 'url'
 
-const isSuccessStatusCode = statusCode => statusCode >= 200 && statusCode < 300
+import { addQueryToUrl, isSuccessStatusCode } from 'scraper/utils'
 
 const executeRequest = options => new Promise(
   (resolve, reject) => {
     request(options, (error, response, html) => {
+      console.log(response.request.body)
       if(error) return reject(error)
       if(!isSuccessStatusCode(response.statusCode))
         return reject(response.statusCode, response)
@@ -15,17 +16,6 @@ const executeRequest = options => new Promise(
       
       resolve({$, response})
     })
-  }
-)
-
-const addQueryToUrl = (parsedUrl, query) => (
-  {
-    ...parsedUrl,
-    query: {
-      ...parsedUrl.query,
-      ...query
-    },
-    search: undefined
   }
 )
 
@@ -48,4 +38,4 @@ const createScraper = (urlStr, builder = methods => methods) => token => {
   })
 }
 
-export { createScraper }
+export default createScraper

@@ -1,5 +1,4 @@
-import { createScraper } from 'scraper'
-import { parseForm, deparseForm } from 'page-utils'
+import { createScraper, form } from 'scraper'
 import { makeConverter } from 'json-mapper'
 
 const convertToUserData = makeConverter({
@@ -55,7 +54,7 @@ const convertFromUserData = makeConverter({
 })
 
 const convertGetResponse = ({$}) => {
-  const data = parseForm($)
+  const data = form($).data
   return convertToUserData(data)
 }
 
@@ -64,9 +63,8 @@ export const userInfo = createScraper(
   ({get, post}) => ({
     get: () => get().then(convertGetResponse),
     post: (data) => get().then(({$}) => {
-      const form = deparseForm($, convertFromUserData(data))
-      return post(form)
-        .then(({$}) => { console.log($.html()); return { $ } })
+      const formData = form($).prepare(convertFromUserData(data), 'btnSave')
+      return post(formData)
         .then(convertGetResponse)
     })
   })
