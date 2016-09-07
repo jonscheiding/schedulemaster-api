@@ -43,6 +43,6 @@ export const middleware = () => (req, res, next) => {
         req.token = parsedToken
         next()
       })
-      .catch(err => res.status(401).send({error: err.toString()}))
+      .catch(err => res.status(400).send({error: 'Invalid token.', detail: err.toString()}))
   })
 }
