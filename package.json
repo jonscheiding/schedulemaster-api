@@ -6,7 +6,7 @@
   "repository": ".",
   "scripts": {
     "test": "NODE_PATH=src mocha",
-    "start": "nodemon"
+    "start": "nodemon --exec babel-node index.js"
   },
   "author": "Jon Scheiding",
   "license": "ISC",
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "app-module-path": "^1.1.0",
+    "babel-cli": "^6.14.0",
     "babel-preset-es2015": "^6.14.0",
     "babel-preset-stage-2": "^6.13.0",
     "babel-register": "^6.14.0",
