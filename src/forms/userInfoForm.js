@@ -1,7 +1,7 @@
-import { createScraper, form } from 'scraper'
 import { makeConverter } from 'json-mapper'
+import { createForm } from 'scraper'
 
-const convertToUserData = makeConverter({
+const convertFromForm = makeConverter({
   name: {
     'lastName': 'tx_lastname',
     'firstName': 'tx_firstname',
@@ -33,7 +33,7 @@ const convertToUserData = makeConverter({
   }
 })
 
-const convertFromUserData = makeConverter({
+const convertToForm = makeConverter({
   'tx_lastname': 'name.lastName',
   'tx_firstname': 'name.firstName',
   'tx_mi': 'name.middleInitial',
@@ -53,19 +53,4 @@ const convertFromUserData = makeConverter({
   'ddl_country' : 'address.country',
 })
 
-const convertGetResponse = ({$}) => {
-  const data = form($).data
-  return convertToUserData(data)
-}
-
-export const userInfo = createScraper(
-  'https://my.schedulemaster.com/UserInfo.aspx?GETUSER=M', 
-  ({get, post}) => ({
-    get: () => get().then(convertGetResponse),
-    post: (data) => get().then(({$}) => {
-      const formData = form($).prepare(convertFromUserData(data), 'btnSave')
-      return post(formData)
-        .then(convertGetResponse)
-    })
-  })
-)
+export default createForm(convertToForm, convertFromForm)
