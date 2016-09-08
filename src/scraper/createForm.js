@@ -1,77 +1,56 @@
 import { makeConverter } from 'json-mapper'
 
-const stripDownAspnetIdentifier = aspnetName => {
+const stripFieldName = aspnetName => {
   if(!aspnetName) return aspnetName
   const lastIndex = aspnetName.lastIndexOf('$')
   if(lastIndex < 0) return aspnetName
   return aspnetName.substring(lastIndex + 1)
 }
 
-const convertFromFormValue = $input => {
+const getValueFromInput = $input => {
   switch($input.attr('type')) {
     case 'checkbox':
-      return $input.is('checked')
+      if($input.is(':checked')) return null
   }
   return $input.val() || null
 }
 
-const convertToFormValue = ($input, value) => {
-  switch($input.attr('type')) {
-    case 'checkbox':
-      return value ? $input.val() : null
-  }
-  return value
-}
-
-const parseForm = ($, post, convertToForm, convertFromForm) => {
+const createForm = (convertFromForm, convertToForm) => ($) => {
   const mapping = {}
-  const initialData = {}
-  const parsedData = {}
+  const unstrippedData = {}
+  const strippedData = {}
   const submits = {}
-  
-  $('input, textarea, select').each((i, input) => {
-    const name = $(input).attr('name')
-    if(!name) return
-    
-    const strippedName = stripDownAspnetIdentifier(name)
-    const value = convertFromFormValue($(input))
 
-    if($(input).attr('type') == 'submit') {
-      submits[strippedName] = { [name]: value }
+  $('input, textarea, select').each((i, input) => {
+    const $input = $(input)
+    const unstrippedName = $input.attr('name')
+    if(!unstrippedName) return
+    
+    const strippedName = stripFieldName(unstrippedName)
+    const value = getValueFromInput($(input))
+
+    if($input.attr('type') == 'submit') {
+      submits[strippedName] = { [unstrippedName]: value }
       return
     }
 
-    initialData[name] = value
-    if(strippedName) parsedData[strippedName] = value
-    mapping[name] = [
-      strippedName,
-      value => convertToFormValue($(input), value)
-    ]
+    unstrippedData[unstrippedName] = value
+    if(strippedName) {
+      strippedData[strippedName] = value
+      mapping[unstrippedName] = strippedName
+    }
   })
-  
+
   const unstripFields = makeConverter(mapping)
   
   return {
-    data: convertFromForm(parsedData),
-    submit: (submitName, updatedData) => {
-      if(submitName && !submits[submitName]) {
-        throw `No such submit for ${submitName} for form.`
-      }
-      
-      const form = {
-        ...initialData,
-        ...unstripFields(convertToForm(updatedData)),
-        ...submits[submitName]
-      }
-      
-      return post({form})
-        .then($ => parseForm($, post, convertToForm, convertFromForm))
-    }
+    data: convertFromForm(strippedData),
+    prepare: (submitName, data) => ({
+      ...unstrippedData, 
+      ...unstripFields(convertToForm(data)),
+      ...submits[submitName]
+    })
   }
-}
-
-const createForm = (convertToForm, convertFromForm) => ({get, post}) => {
-  return get().then($ => parseForm($, post, convertToForm, convertFromForm))
 }
 
 export default createForm

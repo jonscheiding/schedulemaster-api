@@ -1,1 +1,0 @@
-export { default as userInfoPage } from './userInfoPage.js'

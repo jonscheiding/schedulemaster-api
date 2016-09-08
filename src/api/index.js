@@ -1,6 +1,6 @@
 import express from 'express'
-import login from './login.js'
-import user from './user.js'
+import login from './login'
+import user from './user'
 
 const requireToken = (req, res, next) => {
   if(!req.token) {

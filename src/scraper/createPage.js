@@ -1,34 +1,48 @@
 import cheerio from 'cheerio'
 import request from 'request'
-import url from 'url'
-import { addQueryToUrl, isSuccessStatusCode } from 'scraper/utils'
+import objectMap from 'object-map'
+import deepExtend from 'deep-extend'
 
-const createPage = (urlStr) => token => {
-  const makeRequest = (method, options) => {
-    const parsedUrl = addQueryToUrl(url.parse(urlStr, true), token.query)
-    options = { method: method, uri: url.format(parsedUrl), ...options }
+import { isSuccessStatusCode, addQueryToUrl } from 'scraper/utils'
 
-    return new Promise(
-      (resolve, reject) => {
-        request(options, (error, response, html) => {
-          if(error) return reject(error)
-          if(!isSuccessStatusCode(response.statusCode)) {
-            return reject(response.statusCode, response)
-          }
-          
-          const $ = cheerio.load(html)
-          resolve($)
-        })
-      }
+const requestPromise = options => new Promise(
+  (resolve, reject) => {
+    request(options, (error, response, html) => {
+      if(error) return reject({error: error})
+      if(!isSuccessStatusCode(response.statusCode)) return reject({response: response})
       
+      const $ = cheerio.load(html)
+      resolve({$, response})
+    })
+  }
+)
+
+const addSpecs = (specs, page) => result => {
+  const r = ({
+    ...result,
+    ...objectMap(specs, specFn => specFn(result.$, page))
+  })
+  return r
+}
+
+const createPage = (url, staticOptions, resultSpecs) => (token, instanceOptions) => {
+  const page = (method, requestOptions) => {
+    const options = deepExtend(
+      { method: method, url: url, qs: token.query },
+      staticOptions, instanceOptions, requestOptions
     )
+    
+    //
+    // Doing this here because request doesn't seem to be respecting qs in the options
+    //
+    options.url = addQueryToUrl(options.url, options.qs)
+    
+    return requestPromise(options).then(addSpecs(resultSpecs, page))
   }
   
-  return {
-    makeRequest,
-    get: makeRequest.bind(null, 'get'),
-    post: makeRequest.bind(null, 'post')
-  }
+  page.get = page.bind(this, 'get')
+  page.post = page.bind(this, 'post')
+  return page
 }
 
 export default createPage
