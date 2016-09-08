@@ -17,18 +17,23 @@ const requestPromise = options => new Promise(
   }
 )
 
-const addSpecs = (specs, page) => result => {
+const enhance = (enhancers, page) => result => {
+  if(!enhancers) return result
   const r = ({
     ...result,
-    ...objectMap(specs, specFn => specFn(result.$, page))
+    ...objectMap(enhancers, enhanceFn => enhanceFn(result.$, page))
   })
   return r
 }
 
-const createPage = (url, staticOptions, resultSpecs) => (token, instanceOptions) => {
+const createPage = (staticOptions, resultEnhancers) => (token, instanceOptions) => {
+  if(typeof staticOptions === 'string') {
+    staticOptions = {url: staticOptions}
+  }
+  
   const page = (method, requestOptions) => {
     const options = deepExtend(
-      { method: method, url: url, qs: token.query },
+      { method: method, qs: token.query },
       staticOptions, instanceOptions, requestOptions
     )
     
@@ -37,7 +42,7 @@ const createPage = (url, staticOptions, resultSpecs) => (token, instanceOptions)
     //
     options.url = addQueryToUrl(options.url, options.qs)
     
-    return requestPromise(options).then(addSpecs(resultSpecs, page))
+    return requestPromise(options).then(enhance(resultEnhancers, page))
   }
   
   page.get = page.bind(this, 'get')

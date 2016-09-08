@@ -1,6 +1,6 @@
 import express from 'express'
 import { makeConverter } from 'json-mapper'
-import { createPage, createForm } from 'scraper'
+import { createPage, createForm, formEnhancer } from 'scraper'
 
 const api = express.Router()
 export default api
@@ -74,9 +74,6 @@ const convertToForm = makeConverter({
 })
 
 const form = createForm(convertFromForm, convertToForm)
-const page = createPage('https://my.schedulemaster.com/UserInfo.aspx?GETUSER=M', undefined, {
-  form: ($, page) => ({
-    data: form($).data,
-    submit: (data) => page.post({form: form($).prepare('btnSave', data)})
-  })
+const page = createPage('https://my.schedulemaster.com/UserInfo.aspx?GETUSER=M', {
+  form: formEnhancer(form)
 })
