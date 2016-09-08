@@ -23,6 +23,7 @@ api.post('/login', (req, res) => {
       res.status(401).send({
         message: 'Username or password was incorrect.'
       })
+      return
     }
     
     const token = {
