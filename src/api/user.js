@@ -13,13 +13,18 @@ api.put('/user', (req, res) => {
   res.promise(
     page(req.token).get()
       .then(r => r.form.submit(req.body))
-      .then(r => r.form.data))
+      .then(r => {
+        if(r.error) {
+          res.status(400)
+          return r.error
+        }
+        return r.form.data
+      }))
 })
 
 api.get('/test', (req, res) => {
   page(req.token).get().then(p => res.send(p.$.html()))
 })
-
 
 const convertFromForm = makeConverter({
   name: {
@@ -75,5 +80,6 @@ const convertToForm = makeConverter({
 
 const form = createForm(convertFromForm, convertToForm)
 const page = createPage('https://my.schedulemaster.com/UserInfo.aspx?GETUSER=M', {
-  form: formEnhancer(form)
+  form: formEnhancer(form),
+  error: $ => $('.yMessage').text()
 })
