@@ -26,8 +26,11 @@ api.post('/login', (req, res) => {
     }
     
     const token = {
-      userid: redirectUrl.query.userid,
-      session: redirectUrl.query.session
+      username: req.body.user,
+      query: {
+        userid: redirectUrl.query.userid,
+        session: redirectUrl.query.session
+      }
     }
     
     stringify(token)

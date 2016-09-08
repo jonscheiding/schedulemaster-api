@@ -7,8 +7,11 @@ const env = cleanEnv(process.env, { TOKEN_SECRET: str() })
 const encrypter = createEncrypter(env.TOKEN_SECRET)
 
 const tokenSchema = yup.object().noUnknown().shape({
-  userid: yup.string().required(),
-  session: yup.string().required()
+  username: yup.string().required(),
+  query: {
+    userid: yup.string().required(),
+    session: yup.string().required()
+  }
 })
 
 const validate = token => tokenSchema

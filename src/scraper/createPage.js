@@ -5,7 +5,7 @@ import { addQueryToUrl, isSuccessStatusCode } from 'scraper/utils'
 
 const createPage = (urlStr) => token => {
   const makeRequest = (method, options) => {
-    const parsedUrl = addQueryToUrl(url.parse(urlStr, true), token)
+    const parsedUrl = addQueryToUrl(url.parse(urlStr, true), token.query)
     options = { method: method, uri: url.format(parsedUrl), ...options }
 
     return new Promise(
