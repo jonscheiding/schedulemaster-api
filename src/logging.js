@@ -21,13 +21,25 @@ const htmlSerializer = html => {
   return filename
 }
 
+const optionsSerializer = options => {
+  if(!options.url || !options.form) return options
+  
+  //
+  // Strip the __VIEWSTATE and __EVENTVALIDATION fields from the form because 
+  // they are noisy and useless
+  //
+  // eslint-disable-next-line no-unused-vars
+  const { __VIEWSTATE, __EVENTVALIDATION, ...form } = options.form 
+  return { ...options, form }
+}
+
 const logger = bunyan.createLogger({
   name: 'sm-api',
   level: bunyan.DEBUG,
-  serializers: bunyan.stdSerializers
   serializers: {
     ...bunyan.stdSerializers,
     html: htmlSerializer,
+    options: optionsSerializer
   }
 })
 

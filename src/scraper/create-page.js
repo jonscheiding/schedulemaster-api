@@ -8,6 +8,8 @@ import { isSuccessStatusCode, addQueryToUrl } from 'scraper/utils'
 
 const requestPromise = options => new Promise(
   (resolve, reject) => {
+    logger.debug({options})
+    
     request(options, (error, response, html) => {
       if(error) return reject({error: error})
       if(!isSuccessStatusCode(response.statusCode)) return reject({response: response})
