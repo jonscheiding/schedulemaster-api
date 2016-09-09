@@ -27,6 +27,7 @@
     "babel-register": "^6.14.0",
     "body-parser": "^1.15.2",
     "bunyan": "^1.8.1",
+    "bunyan-middleware": "^0.4.0",
     "cheerio": "^0.22.0",
     "deep-extend": "^0.4.1",
     "envalid": "^2.2.0",
