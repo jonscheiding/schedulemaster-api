@@ -11,7 +11,7 @@ const stripFieldName = aspnetName => {
 const getValueFromInput = $input => {
   switch($input.attr('type')) {
     case 'checkbox':
-      if($input.is(':checked')) return null
+      if(!$input.is(':checked')) return null
   }
   return $input.val() || null
 }
