@@ -1,4 +1,5 @@
 import { makeConverter } from 'json-mapper'
+import { logger } from 'logging'
 
 const stripFieldName = aspnetName => {
   if(!aspnetName) return aspnetName
@@ -42,14 +43,22 @@ const createForm = (convertFromForm, convertToForm) => ($) => {
   })
 
   const unstripFields = makeConverter(mapping)
+  const data = convertFromForm(strippedData)
+  
+  logger.debug({form: unstrippedData, data}, 'Deserialized form from response.')
   
   return {
-    data: convertFromForm(strippedData),
-    prepare: (submitName, data) => ({
-      ...unstrippedData, 
-      ...unstripFields(convertToForm(data)),
-      ...submits[submitName]
-    })
+    data,
+    prepare: (submitName, data) => {
+      const result = {
+        ...unstrippedData, 
+        ...unstripFields(convertToForm(data)),
+        ...submits[submitName]
+      }
+      logger.debug({form: result, data}, 'Prepared form for submit.')
+      
+      return result
+    }
   }
 }
 

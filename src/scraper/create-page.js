@@ -8,14 +8,15 @@ import { isSuccessStatusCode, addQueryToUrl } from 'scraper/utils'
 
 const requestPromise = options => new Promise(
   (resolve, reject) => {
-    logger.debug({options})
+    logger.debug({options}, 'Performing HTTP request.')
     
     request(options, (error, response, html) => {
       if(error) return reject({error: error})
+      logger.debug({body: response.request.body, url: options.url, method: options.method}, 'HTTP request completed.')
+      logger.debug({html})
+
       if(!isSuccessStatusCode(response.statusCode)) return reject({response: response})
-      
-      logger.debug({html: html.substring(20)})
-      
+            
       const $ = cheerio.load(html)
       resolve({$, response})
     })
