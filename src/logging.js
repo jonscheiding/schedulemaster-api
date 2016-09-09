@@ -1,9 +1,34 @@
 import bunyan from 'bunyan'
+import fs from 'fs'
+import path from 'path'
+import uuid from 'node-uuid'
+
+const htmlSerializer = html => {
+  if(!process.env.LOG_DIR) return null
+  
+  //
+  // When HTML is logged, dump it to a file instead of the console so it's easier
+  // to review
+  //
+  
+  const filename = uuid.v4() + '.html'
+  const filepath = path.resolve(process.env.LOG_DIR, filename)
+  
+  fs.writeFile(filepath, html, err => {
+    if(err) logger.error('Error writing HTML to logs.', {err})
+  })
+  
+  return filename
+}
 
 const logger = bunyan.createLogger({
   name: 'sm-api',
   level: bunyan.DEBUG,
   serializers: bunyan.stdSerializers
+  serializers: {
+    ...bunyan.stdSerializers,
+    html: htmlSerializer,
+  }
 })
 
 export { logger }

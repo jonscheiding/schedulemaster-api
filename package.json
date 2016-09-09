@@ -34,6 +34,7 @@
     "express": "^4.14.0",
     "express-bearer-token": "^2.1.0",
     "json-mapper": "0.0.10",
+    "node-uuid": "^1.4.7",
     "object-encrypter": "^0.1.3",
     "object-map": "^1.0.2",
     "promise": "^7.1.1",

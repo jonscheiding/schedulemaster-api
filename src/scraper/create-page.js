@@ -3,6 +3,7 @@ import request from 'request'
 import objectMap from 'object-map'
 import deepExtend from 'deep-extend'
 
+import { logger } from 'logging'
 import { isSuccessStatusCode, addQueryToUrl } from 'scraper/utils'
 
 const requestPromise = options => new Promise(
@@ -10,6 +11,8 @@ const requestPromise = options => new Promise(
     request(options, (error, response, html) => {
       if(error) return reject({error: error})
       if(!isSuccessStatusCode(response.statusCode)) return reject({response: response})
+      
+      logger.debug({html: html.substring(20)})
       
       const $ = cheerio.load(html)
       resolve({$, response})
