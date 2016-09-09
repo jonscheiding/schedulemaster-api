@@ -1,6 +1,8 @@
 import express from 'express'
 import { makeConverter } from 'json-mapper'
+
 import { createPage, createForm, formEnhancer } from 'scraper'
+import { checkboxValue }  from 'scraper/utils'
 
 const api = express.Router()
 export default api
@@ -67,9 +69,9 @@ const convertToForm = makeConverter({
   'tx_wrkphone': 'phoneNumbers.work',
   'tx_fax': 'phoneNumbers.fax',
   'tx_email': 'emails.primary.address',
-  'ck_terse1': [ 'emails.primary.terse', value => value ? 'on' : null ],
+  'ck_terse1': [ 'emails.primary.terse', checkboxValue() ],
   'tx_email2': 'emails.secondary.address',
-  'ck_terse2': [ 'emails.secondary.terse', value => value ? 'on' : null ],
+  'ck_terse2': [ 'emails.secondary.terse', checkboxValue() ],
   'tx_street': 'address.street1',
   'tx_street2': 'address.street2',
   'tx_city': 'address.city',

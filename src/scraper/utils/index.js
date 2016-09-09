@@ -2,6 +2,8 @@ import url from 'url'
 
 const isSuccessStatusCode = statusCode => statusCode >= 200 && statusCode < 300
 
+const checkboxValue = (value = 'on') => isChecked => isChecked ? value : null
+
 const addQueryToUrl = (urlStr, query) => {
   const parsedUrl = url.parse(urlStr, true)
   return url.format({
@@ -16,6 +18,7 @@ const addQueryToUrl = (urlStr, query) => {
 
 export {
   isSuccessStatusCode,
-  addQueryToUrl
+  addQueryToUrl,
+  checkboxValue
 }
 
