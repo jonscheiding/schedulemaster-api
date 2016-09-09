@@ -1,3 +1,4 @@
+import { logger } from 'logging'
 import express from 'express'
 import bodyParser from 'body-parser'
 import { middleware as tokenMiddleware } from 'token'
@@ -5,7 +6,11 @@ import expressPromise from 'express-promise'
 
 import api from 'api'
 
+const port = 3000
+
 const app = express()
 app.use(bodyParser.json(), tokenMiddleware(), expressPromise())
 app.use(api)
-app.listen(3000)
+app.listen(port)
+
+logger.info(`Server started successfully on port ${port}.`)

@@ -6,7 +6,7 @@
   "repository": ".",
   "scripts": {
     "test": "NODE_PATH=src mocha",
-    "start": "nodemon --exec babel-node index.js"
+    "start": "nodemon --exec babel-node index.js | bunyan"
   },
   "author": "Jon Scheiding",
   "license": "ISC",
@@ -26,6 +26,7 @@
     "babel-preset-stage-2": "^6.13.0",
     "babel-register": "^6.14.0",
     "body-parser": "^1.15.2",
+    "bunyan": "^1.8.1",
     "cheerio": "^0.22.0",
     "deep-extend": "^0.4.1",
     "envalid": "^2.2.0",
