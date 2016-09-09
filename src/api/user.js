@@ -7,26 +7,20 @@ import { checkboxValue }  from 'scraper/utils'
 const api = express.Router()
 export default api
 
-api.get('/user', (req, res) => {
-  res.promise(page(req.token).get().then(r => r.form.data))
-})
-
-api.put('/user', (req, res) => {
-  res.promise(
-    page(req.token).get()
-      .then(r => r.form.submit(req.body))
-      .then(r => {
-        if(r.error) {
-          res.status(400)
-          return r.error
-        }
-        return r.form.data
-      }))
-})
-
-api.get('/test', (req, res) => {
-  page(req.token).get().then(p => res.send(p.$.html()))
-})
+const getPartOfForm = part => (req, res) => 
+  res.promise(page(req.token).get()
+    .then(r => r.form.data[part]))
+    
+const patchPartOfForm = part => (req, res) => 
+  res.promise(page(req.token).get()
+    .then(r => r.form.submit({[part]: req.body}))
+    .then(r => {
+      if(r.error) {
+        res.status(400)
+        return {message: r.error.toString()}
+      }
+      return r.form.data[part]
+    }))
 
 const convertFromForm = makeConverter({
   name: {
@@ -34,20 +28,22 @@ const convertFromForm = makeConverter({
     'firstName': 'tx_firstname',
     'middleInitial': 'tx_mi',
   },
-  phoneNumbers: {
-    'mobile': 'tx_cellphone',
-    'home': 'tx_hmphone',
-    'work': 'tx_wrkphone',
-    'fax': 'tx_fax',
-  },
-  emails: {
-    primary: {
-      'address': 'tx_email',
-      'terse': ['ck_terse1', value => value == 'on' ],
-    }, 
-    secondary: {
-      'address': 'tx_email2',
-      'terse': [ 'ck_terse2', value => value == 'on' ],
+  contact: {
+    phoneNumbers: {
+      'mobile': 'tx_cellphone',
+      'home': 'tx_hmphone',
+      'work': 'tx_wrkphone',
+      'fax': 'tx_fax',
+    },
+    emails: {
+      primary: {
+        'address': 'tx_email',
+        'terse': ['ck_terse1', value => value == 'on' ],
+      }, 
+      secondary: {
+        'address': 'tx_email2',
+        'terse': [ 'ck_terse2', value => value == 'on' ],
+      }
     }
   },
   address: {
@@ -64,14 +60,14 @@ const convertToForm = makeConverter({
   'tx_lastname': 'name.lastName',
   'tx_firstname': 'name.firstName',
   'tx_mi': 'name.middleInitial',
-  'tx_cellphone': 'phoneNumbers.mobile',
-  'tx_hmphone': 'phoneNumbers.home',
-  'tx_wrkphone': 'phoneNumbers.work',
-  'tx_fax': 'phoneNumbers.fax',
-  'tx_email': 'emails.primary.address',
-  'ck_terse1': [ 'emails.primary.terse', checkboxValue() ],
-  'tx_email2': 'emails.secondary.address',
-  'ck_terse2': [ 'emails.secondary.terse', checkboxValue() ],
+  'tx_cellphone': 'contact.phoneNumbers.mobile',
+  'tx_hmphone': 'contact.phoneNumbers.home',
+  'tx_wrkphone': 'contact.phoneNumbers.work',
+  'tx_fax': 'contact.phoneNumbers.fax',
+  'tx_email': 'contact.emails.primary.address',
+  'ck_terse1': [ 'contact.emails.primary.terse', checkboxValue() ],
+  'tx_email2': 'contact.emails.secondary.address',
+  'ck_terse2': [ 'contact.emails.secondary.terse', checkboxValue() ],
   'tx_street': 'address.street1',
   'tx_street2': 'address.street2',
   'tx_city': 'address.city',
@@ -85,3 +81,21 @@ const page = createPage('https://my.schedulemaster.com/UserInfo.aspx?GETUSER=M',
   form: formEnhancer(form),
   error: $ => $('.yMessage').text()
 })
+
+api.get('/user', (req, res) => {
+  res.send({
+    username: req.token.username,
+    links: {
+      address: '/user/address',
+      contact: '/user/contact',
+      name: '/user/name'
+    }
+  })
+})
+
+api.get('/user/name', getPartOfForm('name'))
+api.get('/user/address', getPartOfForm('address'))
+api.get('/user/contact', getPartOfForm('contact'))
+api.patch('/user/name', patchPartOfForm('name'))
+api.patch('/user/address', patchPartOfForm('address'))
+api.patch('/user/contact', patchPartOfForm('contact'))
