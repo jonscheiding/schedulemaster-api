@@ -1,0 +1,1 @@
+export { default as userInfoForm } from './userinfo-form'

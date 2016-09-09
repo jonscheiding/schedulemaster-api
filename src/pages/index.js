@@ -1,0 +1,1 @@
+export { default as userInfoPage } from './user-info-page'
