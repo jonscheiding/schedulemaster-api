@@ -7,7 +7,7 @@ import bunyanMiddleware from 'bunyan-middleware'
 
 import api from 'api'
 
-const port = 3000
+const port = process.env.port || 3000
 
 const app = express()
 app.use(bodyParser.json(), bunyanMiddleware(logger), tokenMiddleware(), expressPromise())
