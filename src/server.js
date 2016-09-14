@@ -7,11 +7,11 @@ import bunyanMiddleware from 'bunyan-middleware'
 
 import api from 'api'
 
-const port = process.env.PORT || 3000
-
 const app = express()
 app.use(bodyParser.json(), bunyanMiddleware(logger), tokenMiddleware(), expressPromise())
 app.use(api)
-app.listen(port)
 
-logger.info(`Server started successfully on port ${port}.`)
+export const start = port => {
+  app.listen(port)
+  logger.info(`Server started successfully on port ${port}.`)
+}
