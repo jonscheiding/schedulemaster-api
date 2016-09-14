@@ -1,6 +1,9 @@
 {
   "name": "schedulemaster-api",
   "version": "1.0.0",
+  "engines": {
+    "node": "6.5.0"
+  },
   "description": "Screen-scraping API for Schedule Master",
   "main": "index.js",
   "repository": ".",
