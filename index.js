@@ -1,4 +1,5 @@
 var path = require('path')
+require('babel-register')
 require('app-module-path').addPath(path.resolve(__dirname, 'src'))
 
 if(process.env.LOG_DIR) process.env.LOG_DIR = path.resolve(process.env.LOG_DIR)

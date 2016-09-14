@@ -6,7 +6,7 @@
   "repository": ".",
   "scripts": {
     "test": "NODE_PATH=src mocha",
-    "start": "nodemon --exec babel-node index.js | bunyan"
+    "start": "nodemon index.js | bunyan"
   },
   "author": "Jon Scheiding",
   "license": "ISC",
