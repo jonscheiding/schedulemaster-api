@@ -4,7 +4,7 @@ import objectMap from 'object-map'
 import deepExtend from 'deep-extend'
 
 import { logger } from 'logging'
-import { isSuccessStatusCode, addQueryToUrl } from 'scraper/utils'
+import { isErrorStatusCode, addQueryToUrl } from 'scraper/utils'
 
 const requestPromise = options => new Promise(
   (resolve, reject) => {
@@ -15,7 +15,7 @@ const requestPromise = options => new Promise(
       logger.debug({body: response.request.body, url: options.url, method: options.method}, 'HTTP request completed.')
       logger.debug({html})
 
-      if(!isSuccessStatusCode(response.statusCode)) return reject({response: response})
+      if(isErrorStatusCode(response.statusCode)) return reject({response: response})
             
       const $ = cheerio.load(html)
       resolve({$, response})
@@ -27,7 +27,7 @@ const enhance = (enhancers, page) => result => {
   if(!enhancers) return result
   const r = ({
     ...result,
-    ...objectMap(enhancers, enhanceFn => enhanceFn(result.$, page))
+    ...objectMap(enhancers, enhanceFn => enhanceFn(result.$, result.response, page))
   })
   return r
 }
@@ -39,7 +39,7 @@ const createPage = (staticOptions, resultEnhancers) => (token, instanceOptions) 
   
   const page = (method, requestOptions) => {
     const options = deepExtend(
-      { method: method, qs: token.query },
+      { method: method, qs: (token || {}).query },
       staticOptions, instanceOptions, requestOptions
     )
     
