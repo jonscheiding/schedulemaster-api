@@ -1,6 +1,7 @@
 import express from 'express'
 import login from './login'
 import user from './user'
+import oauth from './oauth'
 
 const requireToken = (req, res, next) => {
   if(!req.token) {
@@ -14,4 +15,4 @@ const api = express.Router()
 api.use(requireToken)
 api.use([user])
 
-export default [ login, api ]
+export default [ login, api, oauth ]
