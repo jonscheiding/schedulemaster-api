@@ -1,6 +1,6 @@
 //import { makeConverter } from 'json-mapper'
 
-import { logger } from 'logging'
+//import { logger } from 'logging'
 
 const stripFieldName = aspnetName => {
   if(!aspnetName) return aspnetName
@@ -12,6 +12,7 @@ const stripFieldName = aspnetName => {
 const getValueFromInput = $input => {
   switch($input.attr('type')) {
     case 'checkbox':
+    case 'radio':
       if(!$input.is(':checked')) return null
   }
   return $input.val() || null
@@ -48,19 +49,24 @@ const parseForm = $ => {
   return { mapping, data: strippedData, submits }
 }
 
-const formEnhancer = (convertFromForm) => ({
-  result: (result) => {
-    if(!result.$) throw 'The cheerio enhancer needs to be added before the form enhancer.'
-    
-    const form = parseForm(result.$)
-    const data = convertFromForm(form.data)
-    return {
-      ...result,
-      form: {
-        data
+const formEnhancer = (convertFromForm, convertToForm) => {
+  if(!convertFromForm) convertFromForm = data => data
+  if(!convertToForm) convertToForm = data => data
+  
+  return {
+    result: (result) => {
+      if(!result.$) throw 'The cheerio enhancer needs to be added before the form enhancer.'
+      
+      const form = parseForm(result.$)
+      const data = convertFromForm(form.data)
+      return {
+        ...result,
+        form: {
+          data
+        }
       }
     }
   }
-})
+}
 
 export default formEnhancer
