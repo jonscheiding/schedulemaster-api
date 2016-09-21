@@ -6,6 +6,10 @@ import { userInfoPage as page } from 'pages'
 const api = express.Router()
 export default api
 
+api.get('/user2', (req, res) => {
+  res.promise(page(req.token).then(r => r.form.data))
+})
+
 api.get('/user', (req, res) => {
   res.send({
     username: req.token.username,

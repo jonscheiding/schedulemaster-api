@@ -8,8 +8,8 @@
   "main": "index.js",
   "repository": ".",
   "scripts": {
-    "test": "NODE_PATH=src mocha",
-    "start": "nodemon index.js | bunyan"
+    "test": "rm logs/*.log; NODE_PATH=src mocha",
+    "start": "rm logs/*.log; nodemon index.js | bunyan"
   },
   "author": "Jon Scheiding",
   "license": "ISC",

@@ -2,6 +2,8 @@ import arrayWrap from 'array-wrap'
 import extend from 'deep-extend'
 
 import request from './request-wrapper'
+import { defaults as defaultEnhancers } from './enhancers'
+import { logger } from 'logging'
 
 const cleanOptions = optionsOrUrl => 
   typeof(optionsOrUrl) === 'string' ? {url: optionsOrUrl} : optionsOrUrl
@@ -65,7 +67,7 @@ class Scraper {
 }
 
 const createScraper = (defaultOptions, enhancers = []) =>
-  new Scraper(defaultOptions, enhancers)
+  new Scraper(defaultOptions, [...defaultEnhancers, ...arrayWrap(enhancers)])
 
 export default createScraper
 export { Scraper }

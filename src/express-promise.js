@@ -8,12 +8,9 @@ const rejected = res => err => {
 }
 
 export default () => (req, res, next) => {
-  let promise
-  res.promise = (p) => promise = p
+  res.promise = (p) => {
+    p.then(resolved(res)).catch(rejected(res))
+  }
   
   next()
-  
-  if(promise) {
-    promise.then(resolved(res)).catch(rejected(res))
-  }
 }
