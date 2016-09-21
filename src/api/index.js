@@ -7,4 +7,12 @@ const api = express.Router()
 api.use(authenticate())
 api.use([user])
 
+api.get('/', (req, res) => {
+  res.send({
+    links: {
+      user: '/user'
+    }
+  })
+})
+
 export default [ oauth2, api ]

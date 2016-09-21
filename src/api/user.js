@@ -7,9 +7,12 @@ export default api
 
 api.get('/user', (req, res) => {
   res.send({
-    username: req.token.username,
+    data: {
+      username: req.token.username,
+    },
     links: {
-      info: '/user/info'
+      info: '/user/info',
+      self: '/user'
     }
   })
 })
