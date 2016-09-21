@@ -3,26 +3,25 @@ import express from 'express'
 import oauth2orize from 'oauth2orize'
 
 import { loginPage } from 'pages'
+import { stringify } from 'token'
 
 const server = oauth2orize.createServer()
 
 server.exchange(oauth2orize.exchange.password(
   (client, username, password, scope, done) => {
-    loginPage(null)
-      .post({
-        form: {
-          USERID: username,
-          DATA: password,
-          CMD: 'LOGIN'
+    loginPage.login(username, password)
+      .then(result => {
+        if(!result) {
+          done(false)
+          return
         }
-      }).then(r => r
-        .loginResult()
-        .catch(() => console.log(arguments))
-        .then(token => {
-          console.log(token)
-          done(null, token)
-        })
-      ).catch(error => done({message: error}))
+        
+        return stringify({
+          username: username,
+          query: result
+        }).then(token => done(null, token))
+      })
+      .catch(error => done({message: error.toString()}))
   }
 ))
 
@@ -30,7 +29,7 @@ const app = express.Router()
 app.use(bodyParser.urlencoded({extended: false}))
 
 app.use(
-  '/token',
+  '/oauth2/token',
   server.token(), 
   server.errorHandler()
 )
