@@ -1,9 +1,4 @@
-const chai = require('chai')
-  .use(require('chai-as-promised'))
-  .use(require('chai-spies'))
-  
-const expect = chai.expect
-
+import { expect } from 'test-setup'
 import { token as tokenEnhancer } from 'scraper2/enhancers'
 
 describe('tokenEnhancer', () => {

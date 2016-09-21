@@ -1,11 +1,7 @@
-const chai = require('chai')
-  .use(require('chai-as-promised'))
-  .use(require('chai-spies'))
-  
 import nock from 'nock'
 import urlencoded from 'form-urlencoded'
 
-const expect = chai.expect
+import { chai, expect } from 'test-setup'
 
 import { loginPage } from 'pages'
 

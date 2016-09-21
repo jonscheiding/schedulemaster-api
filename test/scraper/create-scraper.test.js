@@ -1,9 +1,6 @@
-const chai = require('chai')
-  .use(require('chai-as-promised'))
-  .use(require('chai-spies'))
 import nock from 'nock'
 
-const expect = chai.expect
+import { expect, chai } from 'test-setup'
 
 import { createScraper } from 'scraper2'
 

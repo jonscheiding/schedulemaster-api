@@ -40,7 +40,7 @@ const optionsSerializer = options => {
 
 const logger = bunyan.createLogger({
   name: 'sm-api',
-  level: bunyan.DEBUG,
+  level: bunyan[process.env.LOG_LEVEL] || bunyan.DEBUG,
   serializers: {
     ...bunyan.stdSerializers,
     html: serializeToFile,

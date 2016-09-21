@@ -8,7 +8,7 @@
   "main": "index.js",
   "repository": ".",
   "scripts": {
-    "test": "rm logs/*.log; NODE_PATH=src mocha",
+    "test": "rm logs/*.log; LOG_LEVEL=FATAL mocha",
     "start": "rm logs/*.log; nodemon index.js | bunyan"
   },
   "author": "Jon Scheiding",
