@@ -1,19 +1,10 @@
 import express from 'express'
-import login from './login'
-import oauth2 from './oauth2'
+import { api as oauth2, authenticate } from './oauth2'
 
 import user from './user'
 
-const requireToken = (req, res, next) => {
-  if(!req.token) {
-    res.status(401).send({error: 'Authentication required.'})
-    return
-  }
-  next()
-}
-
 const api = express.Router()
-api.use(requireToken)
+api.use(authenticate())
 api.use([user])
 
-export default [ oauth2, login, api ]
+export default [ oauth2, api ]

@@ -1,5 +1,3 @@
-import bodyParser from 'body-parser'
-import express from 'express'
 import oauth2orize from 'oauth2orize'
 
 import { loginPage } from 'pages'
@@ -17,21 +15,12 @@ server.exchange(oauth2orize.exchange.password(
         }
         
         return stringify({
-          username: username,
+          username,
           query: result
-        }).then(token => done(null, token))
+        }).then(tokenStr => done(null, tokenStr))
       })
       .catch(error => done({message: error.toString()}))
   }
 ))
 
-const app = express.Router()
-app.use(bodyParser.urlencoded({extended: false}))
-
-app.use(
-  '/oauth2/token',
-  server.token(), 
-  server.errorHandler()
-)
-
-export default app
+export default server
