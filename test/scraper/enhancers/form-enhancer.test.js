@@ -94,21 +94,21 @@ describe('formEnhancer', () => {
       .and.deep.equal({input1: 'value1'}) 
   })
   
-  it('should use convertFromForm if provided', () => {
-    const convertFromForm = chai.spy(data => data)
+  it('should use convert if provided', () => {
+    const convert = chai.spy(data => data)
     const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
     
-    formEnhancer(convertFromForm).result({$})
+    formEnhancer({convert}).result({$})
       
-    return expect(convertFromForm).to.have.been.called.with({input1: 'value1'})
+    return expect(convert).to.have.been.called.with({input1: 'value1'})
   })
   
-  it('should use the return value of convertFromForm', () => {
+  it('should use the return value of convert', () => {
     const convertedData = {}
-    const convertFromForm = () => convertedData
+    const convert = () => convertedData
     const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
         
-    const result = formEnhancer(convertFromForm).result({$})
+    const result = formEnhancer({convert}).result({$})
     
     return expect(result).to.have.deep.property('form.data').equal(convertedData)
   })
@@ -136,15 +136,15 @@ describe('formEnhancer', () => {
         .with({form: {input1: 'value2'}})
     })
     
-    it('should use convertToForm if provided', () => {
-      const convertToForm = chai.spy(data => data)
+    it('should use unconvert if provided', () => {
+      const unconvert = chai.spy(data => data)
       const scraper = {post: chai.spy()}
       const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
       
-      const result = formEnhancer(null, convertToForm).result({$}, null, scraper)
+      const result = formEnhancer({unconvert}).result({$}, null, scraper)
       result.form.submit({input1: 'value2'})
       
-      expect(convertToForm).to.have.been.called
+      expect(unconvert).to.have.been.called
         .with({input1: 'value2'})
     })
     

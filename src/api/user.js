@@ -1,27 +1,34 @@
 import express from 'express'
 
-import { formMiddleware } from 'scraper'
 import { userInfoPage as page } from 'pages'
 
 const api = express.Router()
 export default api
 
-api.get('/user2', (req, res) => {
-  res.promise(page(req.token).then(r => r.form.data))
-})
-
 api.get('/user', (req, res) => {
   res.send({
     username: req.token.username,
     links: {
-      address: '/user/address',
-      contact: '/user/contact',
-      name: '/user/name'
+      info: '/user/info'
     }
   })
 })
 
-api.use('/user/name', formMiddleware(page, 'name'))
-api.use('/user/address', formMiddleware(page, 'address'))
-api.use('/user/contact', formMiddleware(page, 'contact'))
+api.get('/user/info', (req, res) => {
+  res.promise(page(req.token).then(r => r.form.data))
+})
+
+api.post('/user/info', (req, res) => {
+  res.promise(
+    page(req.token)
+      .then(r => r.form.submit(req.body))
+      .then(r => {
+        if(r.errors) {
+          res.status(400)
+          return {errors: r.errors}
+        }
+        return r.form.data
+      })
+  )
+})
 

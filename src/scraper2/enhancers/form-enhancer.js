@@ -52,37 +52,33 @@ const parseForm = $ => {
     }
   })
 
-  const unstripConverter = makeConverter(mapping)
+  const unstrip = makeConverter(mapping)
   
-  return { mapping, strippedData, submits, 
-    unstripData: strippedData => ({
-      ...unstrippedData,
-      ...unstripConverter(strippedData)
-    })
-  }
+  return { mapping, strippedData, unstrippedData, submits, unstrip }
 }
 
-const formEnhancer = (convertFromForm, convertToForm) => {
-  if(!convertFromForm) convertFromForm = data => data
-  if(!convertToForm) convertToForm = data => data
-  
+const formEnhancer = ({
+  convert = data => data, 
+  unconvert = data => data, 
+  defaultSubmitName
+} = {}) => {
   return {
     result: (result, options, scraper) => {
       if(!result.$) throw 'The cheerio enhancer needs to be added before the form enhancer.'
       
       const parsedForm = parseForm(result.$)
-      const data = convertFromForm(parsedForm.strippedData)
+      const data = convert(parsedForm.strippedData)
       return {
         ...result,
         form: {
           data,
-          submit: (data, submitName, submitOptions) => {
-            const unstrippedData = parsedForm.unstripData(convertToForm(data))
+          submit: (data, submitName = defaultSubmitName, submitOptions) => {
             return scraper.post({
               ...options,
               ...submitOptions,
               form: {
-                ...unstrippedData,
+                ...parsedForm.unstrippedData,
+                ...parsedForm.unstrip(unconvert(data)),
                 ...parsedForm.submits[submitName]
               }
             })

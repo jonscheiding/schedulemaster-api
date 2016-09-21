@@ -4,7 +4,7 @@ import { checkboxValue } from 'scraper/utils'
 import { createScraper } from 'scraper2'
 import { form as formEnhancer } from 'scraper2/enhancers'
 
-const convertToForm = makeConverter({
+const convertFromForm = makeConverter({
   name: {
     'lastName': 'tx_lastname',
     'firstName': 'tx_firstname',
@@ -37,7 +37,7 @@ const convertToForm = makeConverter({
     'country': 'ddl_country',
   }
 })
-const convertFromForm = makeConverter({
+const convertToForm = makeConverter({
   'tx_lastname': 'name.lastName',
   'tx_firstname': 'name.firstName',
   'tx_mi': 'name.middleInitial',
@@ -59,7 +59,23 @@ const convertFromForm = makeConverter({
 
 const scraper = createScraper(
   'https://my.schedulemaster.com/UserInfo.aspx?GETUSER=M',
-  formEnhancer(convertToForm)
+  formEnhancer({
+    convert: convertFromForm, 
+    unconvert: convertToForm,
+    defaultSubmitName: 'btnSave'
+  }),
+  {
+    result: (result) => {
+      const message = result.$('.yMessage').text()
+      console.log('HELLO', result.$('yMessage'))
+      if(!message) return result
+      
+      return {
+        ...result,
+        errors: [message]
+      }
+    }
+  }
 )
 
 export default (token) => scraper.get({token})

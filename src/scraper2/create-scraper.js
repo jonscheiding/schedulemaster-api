@@ -3,7 +3,6 @@ import extend from 'deep-extend'
 
 import request from './request-wrapper'
 import { defaults as defaultEnhancers } from './enhancers'
-import { logger } from 'logging'
 
 const cleanOptions = optionsOrUrl => 
   typeof(optionsOrUrl) === 'string' ? {url: optionsOrUrl} : optionsOrUrl
@@ -48,13 +47,13 @@ class Scraper {
       cleanOptions(options)
     )
     
-    finalOptions = {method, ...finalOptions}    
+    finalOptions = {...finalOptions, method}
     finalOptions = this.enhanceOptions(finalOptions)
         
     let result = request(finalOptions)
     
     result = this.enhanceResult(result, finalOptions)
-    
+
     return result
   }
   
@@ -66,7 +65,7 @@ class Scraper {
   }
 }
 
-const createScraper = (defaultOptions, enhancers = []) =>
+const createScraper = (defaultOptions, ...enhancers) =>
   new Scraper(defaultOptions, [...defaultEnhancers, ...arrayWrap(enhancers)])
 
 export default createScraper
