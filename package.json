@@ -8,7 +8,9 @@
   "main": "index.js",
   "repository": ".",
   "scripts": {
+    "lint": "eslint .",
     "test": "LOG_LEVEL=FATAL mocha",
+    "test:newman": "newman run https://www.getpostman.com/collections/f72792864ca403d39691 -e .env.newman",
     "start": "rm logs/*.log; nodemon index.js | bunyan"
   },
   "author": "Jon Scheiding",
@@ -21,6 +23,7 @@
     "eslint": "^3.4.0",
     "mocha": "^3.0.2",
     "mocha-logger": "^1.0.4",
+    "newman": "^3.1.0",
     "nock": "^8.0.0"
   },
   "dependencies": {
