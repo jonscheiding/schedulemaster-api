@@ -1,5 +1,5 @@
 import { expect } from 'test-setup'
-import { token as tokenEnhancer } from 'scraper2/enhancers'
+import { token as tokenEnhancer } from 'scraper/enhancers'
 
 describe('tokenEnhancer', () => {
   const token = {query: {ab: 'cd'}}

@@ -1,6 +1,6 @@
 import url from 'url'
 
-import { createScraper } from 'scraper2'
+import { createScraper } from 'scraper'
 import { logger } from 'logging'
 import { stringify } from 'token'
 

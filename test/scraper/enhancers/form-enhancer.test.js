@@ -1,7 +1,7 @@
 import cheerio from 'cheerio'
 import { chai, expect } from 'test-setup'
 
-import { form as formEnhancer } from 'scraper2/enhancers'
+import { form as formEnhancer } from 'scraper/enhancers'
 
 describe('formEnhancer', () => {
   it('should extract the input fields into a form.data object', () => {

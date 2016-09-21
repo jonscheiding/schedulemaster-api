@@ -2,7 +2,7 @@ import nock from 'nock'
 
 import { expect, chai } from 'test-setup'
 
-import { createScraper } from 'scraper2'
+import { createScraper } from 'scraper'
 
 describe('scraper', () => {
   const scraper = createScraper('http://nowhere/test')
@@ -20,8 +20,8 @@ describe('scraper', () => {
   })
   
   it('should make a request to the specified URL', () => {
-    const scraper2 = createScraper('http://www.google.com')
-    const promise = scraper2.get('http://nowhere/test')
+    const scraper = createScraper('http://www.google.com')
+    const promise = scraper.get('http://nowhere/test')
     
     return promise
   })
@@ -39,11 +39,11 @@ describe('scraper', () => {
     let spiedOptions
     let spy = chai.spy(options => spiedOptions = options)
     
-    let scraper2 = scraper.enhance({
+    let scraper = scraper.enhance({
       options: spy
     })
 
-    const promise = scraper2.get({someProp: 'someValue'})
+    const promise = scraper.get({someProp: 'someValue'})
     
     return promise.then(() => {
       expect(spy).to.have.been.called()
@@ -53,11 +53,11 @@ describe('scraper', () => {
   })
 
   it('should use the options returned by the options enhancer', () => {
-    let scraper2 = createScraper('http://www.google.com').enhance({
+    let scraper = createScraper('http://www.google.com').enhance({
       options: () => ({url: 'http://nowhere/test'})
     })
     
-    const promise = scraper2.get()
+    const promise = scraper.get()
     
     return promise
   })
@@ -71,11 +71,11 @@ describe('scraper', () => {
       return undefined
     })
     
-    let scraper2 = scraper.enhance({
+    let scraper = scraper.enhance({
       result: spy
     })
     
-    const promise = scraper2.get()
+    const promise = scraper.get()
     
     return promise.then(result => {
       expect(spy).to.have.been.called()
@@ -85,11 +85,11 @@ describe('scraper', () => {
   })
   
   it('should return the response as enhanced by the response enhancer', () => {
-    let scraper2 = scraper.enhance({
+    let scraper = scraper.enhance({
       result: result => ({...result, enhanced: true})
     })
     
-    const promise = scraper2.get()
+    const promise = scraper.get()
     
     return promise.then(result => {
       expect(result).to.have.property('enhanced', true)

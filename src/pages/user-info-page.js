@@ -1,8 +1,8 @@
 import { makeConverter } from 'json-mapper'
 
 import { checkboxValue } from 'scraper/utils'
-import { createScraper } from 'scraper2'
-import { form as formEnhancer } from 'scraper2/enhancers'
+import { createScraper } from 'scraper'
+import { form as formEnhancer } from 'scraper/enhancers'
 
 const convertFromForm = makeConverter({
   name: {
