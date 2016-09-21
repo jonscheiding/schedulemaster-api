@@ -194,7 +194,7 @@ describe('formEnhancer', () => {
     })
     
     it('should include the submit field when submit is specified', () => {
-      const scraper = {post: chai.spy(console.log)}
+      const scraper = {post: chai.spy()}
       const $ = cheerio.load(`<form>
         <input type="text" name="input1" value="value1">
         <input type="submit" name="submitbutton" value="submitme">

@@ -67,7 +67,6 @@ const scraper = createScraper(
   {
     result: (result) => {
       const message = result.$('.yMessage').text()
-      console.log('HELLO', result.$('yMessage'))
       if(!message) return result
       
       return {

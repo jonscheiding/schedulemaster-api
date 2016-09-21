@@ -1,7 +1,7 @@
 import nock from 'nock'
 import urlencoded from 'form-urlencoded'
 
-import { chai, expect } from 'test-setup'
+import { expect } from 'test-setup'
 
 import { loginPage } from 'pages'
 

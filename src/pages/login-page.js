@@ -2,7 +2,6 @@ import url from 'url'
 
 import { createScraper } from 'scraper'
 import { logger } from 'logging'
-import { stringify } from 'token'
 
 const loginResult = (response, options) => {
   const username = options.form.USERID
