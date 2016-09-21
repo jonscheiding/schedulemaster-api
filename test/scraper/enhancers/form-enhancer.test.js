@@ -68,6 +68,32 @@ describe('formEnhancer', () => {
       .and.deep.equal({input1: 'value1'})
   })
   
+  it('should strip out ASP.NET control fields from the result data', () => {
+    const $ = cheerio.load(`<form>
+      <input type="text" name="ctl00$ctl11$input1" value="value1">
+      <input type="hidden" name="__VIEWSTATE" value="viewstate">
+      <input type="hidden" name="__EVENTTARGET" value="eventtarget">
+      <input type="hidden" name="__EVENTARGUMENT" value="eventargument">
+    </form>`)
+
+    const result = formEnhancer().result({$})
+    
+    expect(result).to.have.deep.property('form.data')
+      .and.deep.equal({input1: 'value1'})
+  })
+  
+  it('should strip out submit button fields from the result data', () => {
+    const $ = cheerio.load(`<form>
+      <input type="text" name="input1" value="value1">
+      <input type="submit" name="submit" value="submit">
+    </form>`)   
+    
+    const result = formEnhancer().result({$})
+    
+    expect(result).to.have.deep.property('form.data')
+      .and.deep.equal({input1: 'value1'}) 
+  })
+  
   it('should use convertFromForm if provided', () => {
     const convertFromForm = chai.spy(data => data)
     const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
@@ -85,5 +111,144 @@ describe('formEnhancer', () => {
     const result = formEnhancer(convertFromForm).result({$})
     
     return expect(result).to.have.deep.property('form.data').equal(convertedData)
+  })
+  
+  it('should add a submit method to the result', () => {
+    const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+    
+    const result = formEnhancer().result({$})
+    
+    return expect(result)
+      .to.have.deep.property('form.submit')
+      .and.be.a('function')
+  })
+  
+  describe('submit()', () => {
+    it('should post the provided data to the original scraper', () => {
+      const scraper = {post: chai.spy()}
+      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      
+      const result = formEnhancer().result({$}, null, scraper)
+      result.form.submit({input1: 'value2'})
+      
+      return expect(scraper.post)
+        .to.have.been.called
+        .with({form: {input1: 'value2'}})
+    })
+    
+    it('should use convertToForm if provided', () => {
+      const convertToForm = chai.spy(data => data)
+      const scraper = {post: chai.spy()}
+      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      
+      const result = formEnhancer(null, convertToForm).result({$}, null, scraper)
+      result.form.submit({input1: 'value2'})
+      
+      expect(convertToForm).to.have.been.called
+        .with({input1: 'value2'})
+    })
+    
+    it('should convert ASP.NET field names back to their unstripped versions', () => {
+      const scraper = {post: chai.spy()}
+      const $ = cheerio.load('<form><input type="text" name="ctl00$ctl00$input1" value="value1"></form>')  
+      
+      const result = formEnhancer().result({$}, null, scraper)
+      result.form.submit({input1: 'value2'})
+      
+      return expect(scraper.post)
+        .to.have.been.called
+        .with({form: {'ctl00$ctl00$input1': 'value2'}})
+    })
+    
+    it('should include ASP.NET control fields when submitting the form', () => {
+      const scraper = {post: chai.spy()}
+      const $ = cheerio.load(`<form>
+        <input type="text" name="ctl00$ctl11$input1" value="value1">
+        <input type="hidden" name="__VIEWSTATE" value="viewstate">
+        <input type="hidden" name="__EVENTTARGET" value="eventtarget">
+        <input type="hidden" name="__EVENTARGUMENT" value="eventargument">
+      </form>`)
+      
+      const result = formEnhancer().result({$}, null, scraper)
+      result.form.submit({input1: 'value2'})
+      
+      return expect(scraper.post)
+        .to.have.been.called
+        .with({ form: {
+          'ctl00$ctl11$input1': 'value2',
+          __VIEWSTATE: 'viewstate', 
+          __EVENTTARGET: 'eventtarget', 
+          __EVENTARGUMENT: 'eventargument'
+        } })
+    })
+    
+    it('should return the result that the scraper returns', () => {
+      const postResult = {}
+      const scraper = {post: () => postResult}
+      const $ = cheerio.load('<form><input type="text" name="ctl00$ctl00$input1" value="value1"></form>')      
+      
+      const result = formEnhancer().result({$}, null, scraper)
+      const submitResult = result.form.submit({})
+      
+      expect(submitResult).to.equal(postResult)      
+    })
+    
+    it('should include the submit field when submit is specified', () => {
+      const scraper = {post: chai.spy(console.log)}
+      const $ = cheerio.load(`<form>
+        <input type="text" name="input1" value="value1">
+        <input type="submit" name="submitbutton" value="submitme">
+      </form>`)
+      
+      const result = formEnhancer().result({$}, null, scraper)
+      result.form.submit({input1: 'value1'}, 'submitbutton')
+      
+      return expect(scraper.post).to.have.been.called.with({ form: {
+        input1: 'value1',
+        submitbutton: 'submitme'
+      } })
+    })
+      
+    it('should leave fields as their previous value if they aren\'t specified', () => {
+      const scraper = {post: chai.spy()}
+      const $ = cheerio.load(`<form>
+        <input type="text" name="input1" value="value1">
+        <input type="text" name="input2" value="value2">
+      </form>`)
+      
+      const result = formEnhancer().result({$}, null, scraper)
+      result.form.submit({input1: 'value1`'})
+      
+      return expect(scraper.post).to.have.been.called.with({ form: {
+        input1: 'value1`',
+        input2: 'value2'
+      }})
+    })
+    
+    it('should pass original options to post() if they exist', () => {
+      const scraper = {post: chai.spy()}
+      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      
+      const result = formEnhancer().result({$}, {other: 'options'}, scraper)
+      result.form.submit({})
+      
+      return expect(scraper.post).to.have.been.called.with({ 
+        form: { input1: 'value1' },
+        other: 'options'
+      })
+    })
+    
+    it('should pass additional options to post() if they are provided', () => {
+      const scraper = {post: chai.spy()}
+      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      
+      const result = formEnhancer().result({$}, null, scraper)
+      result.form.submit({}, null, {other: 'options'})
+      
+      return expect(scraper.post).to.have.been.called.with({ 
+        form: { input1: 'value1' },
+        other: 'options'
+      })      
+    })
   })
 })

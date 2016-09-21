@@ -1,9 +1,17 @@
-//import { makeConverter } from 'json-mapper'
+import { makeConverter } from 'json-mapper'
 
 //import { logger } from 'logging'
 
 const stripFieldName = aspnetName => {
   if(!aspnetName) return aspnetName
+  
+  switch(aspnetName) {
+    case '__VIEWSTATE':
+    case '__EVENTTARGET':
+    case '__EVENTARGUMENT':
+      return undefined
+  }
+  
   const lastIndex = aspnetName.lastIndexOf('$')
   if(lastIndex < 0) return aspnetName
   return aspnetName.substring(lastIndex + 1)
@@ -44,9 +52,14 @@ const parseForm = $ => {
     }
   })
 
-  //const unstripData = makeConverter(mapping)
+  const unstripConverter = makeConverter(mapping)
   
-  return { mapping, data: strippedData, submits }
+  return { mapping, strippedData, submits, 
+    unstripData: strippedData => ({
+      ...unstrippedData,
+      ...unstripConverter(strippedData)
+    })
+  }
 }
 
 const formEnhancer = (convertFromForm, convertToForm) => {
@@ -54,15 +67,26 @@ const formEnhancer = (convertFromForm, convertToForm) => {
   if(!convertToForm) convertToForm = data => data
   
   return {
-    result: (result) => {
+    result: (result, options, scraper) => {
       if(!result.$) throw 'The cheerio enhancer needs to be added before the form enhancer.'
       
-      const form = parseForm(result.$)
-      const data = convertFromForm(form.data)
+      const parsedForm = parseForm(result.$)
+      const data = convertFromForm(parsedForm.strippedData)
       return {
         ...result,
         form: {
-          data
+          data,
+          submit: (data, submitName, submitOptions) => {
+            const unstrippedData = parsedForm.unstripData(convertToForm(data))
+            return scraper.post({
+              ...options,
+              ...submitOptions,
+              form: {
+                ...unstrippedData,
+                ...parsedForm.submits[submitName]
+              }
+            })
+          }
         }
       }
     }
