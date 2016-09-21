@@ -39,11 +39,11 @@ describe('scraper', () => {
     let spiedOptions
     let spy = chai.spy(options => spiedOptions = options)
     
-    let scraper = scraper.enhance({
+    let scraper2 = scraper.enhance({
       options: spy
     })
 
-    const promise = scraper.get({someProp: 'someValue'})
+    const promise = scraper2.get({someProp: 'someValue'})
     
     return promise.then(() => {
       expect(spy).to.have.been.called()
@@ -71,11 +71,11 @@ describe('scraper', () => {
       return undefined
     })
     
-    let scraper = scraper.enhance({
+    let scraper2 = scraper.enhance({
       result: spy
     })
     
-    const promise = scraper.get()
+    const promise = scraper2.get()
     
     return promise.then(result => {
       expect(spy).to.have.been.called()
@@ -85,11 +85,11 @@ describe('scraper', () => {
   })
   
   it('should return the response as enhanced by the response enhancer', () => {
-    let scraper = scraper.enhance({
+    let scraper2 = scraper.enhance({
       result: result => ({...result, enhanced: true})
     })
     
-    const promise = scraper.get()
+    const promise = scraper2.get()
     
     return promise.then(result => {
       expect(result).to.have.property('enhanced', true)
