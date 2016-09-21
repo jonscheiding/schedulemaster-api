@@ -1,5 +1,4 @@
 import nock from 'nock'
-import urlencoded from 'form-urlencoded'
 
 import { expect } from 'test-setup'
 
@@ -8,11 +7,11 @@ import { loginPage } from 'pages'
 describe('loginPage', () => {
   it('should pass the form correctly in the request', () => {
     const n = nock('https://my.schedulemaster.com')
-      .post('/login.asp', urlencoded({
+      .post('/login.asp', {
         USERID: 'username',
         DATA: 'password',
         CMD: 'LOGIN'
-      }))
+      })
       .reply(200)
       
     return loginPage.login('username', 'password')
