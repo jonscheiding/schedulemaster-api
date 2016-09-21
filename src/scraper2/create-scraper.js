@@ -6,41 +6,66 @@ import request from './request-wrapper'
 const cleanOptions = optionsOrUrl => 
   typeof(optionsOrUrl) === 'string' ? {url: optionsOrUrl} : optionsOrUrl
 
-const applyEnhancers = (enhancers, select, apply) => {
-  arrayWrap(enhancers).forEach(enhancer => {
-    const fn = select(enhancer)
-    if(fn) apply(fn)
-  })
-}
+class Scraper {
+  constructor(options, enhancers = []) {
+    this.defaultOptions = options
+    this.enhancers = arrayWrap(enhancers)
+    
+    ;['get', 'post'].forEach(method => 
+      this[method] = this.execute.bind(this, method)
+    )
+  }
+  
+  applyEnhancers(select, apply) {
+    this.enhancers.forEach(enhancer => {
+      const fn = select(enhancer)
+      if(fn) apply(fn)
+    })
+  }
 
-const createScraper = (defaultOptions, enhancers = []) => {
-  const scraper = (options) => {
+  enhanceOptions(options) {
+    this.applyEnhancers(
+      enhancer => enhancer.options,
+      fn => options = fn(options) || options
+    )
+      
+    return options
+  }
+  
+  enhanceResult(result, options) {
+    this.applyEnhancers(
+      enhancer => enhancer.result,
+      fn => result = result.then(r => fn(r, options, this) || r)
+    )
+    return result
+  }
+  
+  execute(method, options) {
     let finalOptions = extend(
-      cleanOptions(defaultOptions),
+      cleanOptions(this.defaultOptions),
       cleanOptions(options)
     )
-        
-    applyEnhancers(enhancers, 
-      enhancer => enhancer.options,
-      fn => finalOptions = fn(finalOptions) || finalOptions
-    )
+    
+    finalOptions = {method, ...finalOptions}    
+    finalOptions = this.enhanceOptions(finalOptions)
         
     let result = request(finalOptions)
     
-    applyEnhancers(enhancers,
-      enhancer => enhancer.result,
-      fn => result = result.then(r => fn(r, finalOptions) || r)
-    )
+    result = this.enhanceResult(result, finalOptions)
     
     return result
   }
   
-  ;['post', 'get'].forEach(method => {
-    scraper[method] = options => scraper({method, ...options})
-  })
-  
-  scraper.enhance = newEnhancers => createScraper(defaultOptions, [...enhancers, ...arrayWrap(newEnhancers)])
-  return scraper
+  enhance(enhancers) {
+    return new Scraper(
+      this.defaultOptions, 
+      [...this.enhancers, ...arrayWrap(enhancers)]
+    )
+  }
 }
 
+const createScraper = (defaultOptions, enhancers = []) =>
+  new Scraper(defaultOptions, enhancers)
+
 export default createScraper
+export { Scraper }
