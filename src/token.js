@@ -8,6 +8,7 @@ const encrypter = createEncrypter(env.TOKEN_SECRET)
 
 const tokenSchema = yup.object().noUnknown().shape({
   username: yup.string().required(),
+  client: yup.string(),
   query: yup.object().required().shape({
     userid: yup.string().required(),
     session: yup.string().required()

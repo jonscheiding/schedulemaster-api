@@ -16,6 +16,7 @@ server.exchange(oauth2orize.exchange.password(
         
         return stringify({
           username,
+          client,
           query: result
         }).then(tokenStr => done(null, tokenStr))
       })
