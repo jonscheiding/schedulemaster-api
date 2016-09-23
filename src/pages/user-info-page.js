@@ -64,8 +64,8 @@ const scraper = createScraper(
     unconvert: convertToForm,
     defaultSubmitName: 'btnSave'
   }),
-  {
-    result: (result) => {
+  (options, next) => next().then(
+    (result) => {
       const message = result.$('.yMessage').text()
       if(!message) return result
       
@@ -74,7 +74,7 @@ const scraper = createScraper(
         errors: [message]
       }
     }
-  }
+  )
 )
 
 export default (token) => scraper.get({token})

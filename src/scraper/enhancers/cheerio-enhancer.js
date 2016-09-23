@@ -1,8 +1,7 @@
 import cheerio from 'cheerio'
 
-export default {
-  result: result => ({
+export default(options, next) => 
+  next().then(result => ({
     ...result,
     $: cheerio.load(result.html)
-  })
-}
+  }))

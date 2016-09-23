@@ -12,33 +12,21 @@ class Scraper {
     this.defaultOptions = options
     this.enhancers = arrayWrap(enhancers)
     
-    ;['get', 'post'].forEach(method => 
+    for(let enhancer of this.enhancers) {
+      if(typeof(enhancer) !== 'function') throw new Error(`Enhancer ${enhancer} is not a function.`)
+    }
+    
+    ['get', 'post'].forEach(method => 
       this[method] = this.execute.bind(this, method)
     )
   }
   
-  applyEnhancers(select, apply) {
-    this.enhancers.forEach(enhancer => {
-      const fn = select(enhancer)
-      if(fn) apply(fn)
-    })
-  }
-
-  enhanceOptions(options) {
-    this.applyEnhancers(
-      enhancer => enhancer.options,
-      fn => options = fn(options) || options
-    )
-      
-    return options
-  }
-  
-  enhanceResult(result, options) {
-    this.applyEnhancers(
-      enhancer => enhancer.result,
-      fn => result = result.then(r => fn(r, options, this) || r)
-    )
-    return result
+  wrapWithEnhancer(initialOptions, inner, enhancer) {
+    const next = (enhancedOptions = initialOptions) => 
+    inner(enhancedOptions)
+    
+    return (options = initialOptions) => 
+      enhancer(options, next, this)
   }
   
   execute(method, options) {
@@ -48,16 +36,18 @@ class Scraper {
     )
     
     finalOptions = {...finalOptions, method}
-    finalOptions = this.enhanceOptions(finalOptions)
-        
-    let result = request(finalOptions)
+    let makeRequest = (o) => {
+      return request(o)
+    }
     
-    result = this.enhanceResult(result, finalOptions)
-
-    return result
+    for(let enhancer of this.enhancers) {
+      makeRequest = this.wrapWithEnhancer(finalOptions, makeRequest, enhancer)
+    }
+    
+    return makeRequest(finalOptions)
   }
   
-  enhance(enhancers) {
+  use(enhancers) {
     return new Scraper(
       this.defaultOptions, 
       [...this.enhancers, ...arrayWrap(enhancers)]

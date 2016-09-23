@@ -15,10 +15,9 @@ describe('formEnhancer', () => {
       </select>
     </form>`)
     
-    const e = formEnhancer()
-    const result = e.result({$})
-    
-    expect(result).to.have.deep.property('form.data')
+    const result = formEnhancer()({}, () => Promise.resolve({ result: {$} }))
+
+    expect(result).to.eventually.have.deep.property('form.data')
       .and.deep.equal({
         input1: 'value1',
         input2: 'value2',

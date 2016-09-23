@@ -61,32 +61,29 @@ const formEnhancer = ({
   convert = data => data, 
   unconvert = data => data, 
   defaultSubmitName
-} = {}) => {
-  return {
-    result: (result, options, scraper) => {
-      if(!result.$) throw 'The cheerio enhancer needs to be added before the form enhancer.'
-      
-      const parsedForm = parseForm(result.$)
-      const data = convert(parsedForm.strippedData)
-      return {
-        ...result,
-        form: {
-          data,
-          submit: (data, submitName = defaultSubmitName, submitOptions) => {
-            return scraper.post({
-              ...options,
-              ...submitOptions,
-              form: {
-                ...parsedForm.unstrippedData,
-                ...parsedForm.unstrip(unconvert(data)),
-                ...parsedForm.submits[submitName]
-              }
-            })
-          }
+} = {}) => (options, next, scraper) =>
+  next().then(result => {
+    if(!result.$) throw 'The cheerio enhancer needs to be added before the form enhancer.'
+    
+    const parsedForm = parseForm(result.$)
+    const data = convert(parsedForm.strippedData)
+    return {
+      ...result,
+      form: {
+        data,
+        submit: (data, submitName = defaultSubmitName, submitOptions) => {
+          return scraper.post({
+            ...options,
+            ...submitOptions,
+            form: {
+              ...parsedForm.unstrippedData,
+              ...parsedForm.unstrip(unconvert(data)),
+              ...parsedForm.submits[submitName]
+            }
+          })
         }
       }
     }
-  }
-}
+  })
 
 export default formEnhancer

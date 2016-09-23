@@ -34,9 +34,8 @@ const scraper = createScraper(
     url: 'https://my.schedulemaster.com/login.asp',
     followRedirect: false
   },
-  {
-    result: (result, options) => loginResult(result.response, options)
-  }
+  (options, next) => next().then(
+    result => loginResult(result.response, options))
 )
 
 export default {
