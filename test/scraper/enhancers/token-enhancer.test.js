@@ -2,9 +2,9 @@ import { expect, chai } from 'test-setup'
 import { token as tokenEnhancer } from 'scraper/enhancers'
 
 describe('tokenEnhancer', () => {
-  const token = {query: {ab: 'cd'}}
+  const token = {session: {ab: 'cd'}}
   
-  it('should set the token query as the query string', () => {
+  it('should set the token session as the query string', () => {
     const options = { token }
     const next = chai.spy()
     
@@ -15,7 +15,7 @@ describe('tokenEnhancer', () => {
     })
   })
   
-  it('should add the token query to the query string if it already exists', () => {
+  it('should add the token session to the query string if it already exists', () => {
     const options = { token, qs: {ef: 'gh'} }
     const next = chai.spy()
     
