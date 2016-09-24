@@ -21,30 +21,39 @@ class Scraper {
     )
   }
   
-  wrapWithEnhancer(initialOptions, inner, enhancer) {
-    const next = (enhancedOptions = initialOptions) => 
-    inner(enhancedOptions)
-    
-    return (options = initialOptions) => 
-      enhancer(options, next, this)
-  }
-  
   execute(method, options) {
-    let finalOptions = extend(
+    let actualOptions = extend(
       cleanOptions(this.defaultOptions),
       cleanOptions(options)
     )
     
-    finalOptions = {...finalOptions, method}
-    let makeRequest = (o) => {
-      return request(o)
+    actualOptions = {...actualOptions, method}
+    const remainingEnhancers = [...this.enhancers]
+    
+    //
+    // Implement a connect() like middleware style for enhancers.  Enhancers
+    // look like this:
+    //  (options, next, scraper) => next(options).then(r => r)
+    //
+    // Enhancers can change the options before passing them to next(), and they
+    // can then() or catch() on the promise.  If the enhancer passes undefined
+    // to next(), the options should pass through.
+    //
+    // This method accomplishes that with a closure on actualOptions.  Every
+    // time an enhancer calls next(), the provided options are set into this 
+    // var.  The var is used as the default in case the enhancer didn't pass
+    // anything.
+    // 
+    const next = (nextOptions = actualOptions) => {
+      actualOptions = nextOptions
+      const enhancer = remainingEnhancers.pop()
+      if(enhancer) {
+        return enhancer(nextOptions, next, this)
+      }
+      return request(nextOptions)
     }
     
-    for(let enhancer of this.enhancers) {
-      makeRequest = this.wrapWithEnhancer(finalOptions, makeRequest, enhancer)
-    }
-    
-    return makeRequest(finalOptions)
+    return next(actualOptions)
   }
   
   use(enhancers) {
