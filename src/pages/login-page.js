@@ -34,7 +34,7 @@ const getLoginFormData = (username, password) => ({
   CMD: 'LOGIN'
 })
 
-const scraper = createScraper(
+export default createScraper(
   {
     url: 'https://my.schedulemaster.com/login.asp',
     followRedirect: false
@@ -50,13 +50,3 @@ const scraper = createScraper(
       result => getLoginResult(result.response, options))
   }
 )
-
-export default {
-  login: (username, password) => scraper.post({
-    form: {
-      USERID: username,
-      DATA: password,
-      CMD: 'LOGIN'    
-    }
-  })
-}

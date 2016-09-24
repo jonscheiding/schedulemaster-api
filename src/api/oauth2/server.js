@@ -7,7 +7,7 @@ const server = oauth2orize.createServer()
 
 server.exchange(oauth2orize.exchange.password(
   (client, username, password, scope, done) => {
-    loginPage.login(username, password)
+    loginPage.post({username, password})
       .then(result => {
         if(!result) {
           done(false)

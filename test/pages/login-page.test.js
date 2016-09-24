@@ -14,7 +14,7 @@ describe('loginPage', () => {
       })
       .reply(200)
       
-    return loginPage.login('username', 'password')
+    return loginPage.post({username: 'username', password: 'password'})
       .catch(() => {})
       .then(() => n.done())
   })
@@ -24,7 +24,7 @@ describe('loginPage', () => {
       .post('/login.asp')
       .reply(301, '', {'Location': '/wherever?userid=12345&session=67890'})
       
-    return loginPage.login('username', 'password')
+    return loginPage.post({username: 'username', password: 'password'})
       .then(result => {
         expect(result).to.have.property('userid', '12345')
         expect(result).to.have.property('session', '67890')
