@@ -4,7 +4,7 @@ import { logger } from 'logging'
 export default (options, next) => {
   if(!options || !options.token) {
     logger.debug('No token provided for request.')
-    return options
+    return next(options)
   }
   
   logger.info({token: options.token}, 'Adding token to request.')
