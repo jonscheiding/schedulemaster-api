@@ -57,33 +57,48 @@ const parseForm = $ => {
   return { mapping, strippedData, unstrippedData, submits, unstrip }
 }
 
-const formEnhancer = ({
-  convert = data => data, 
-  unconvert = data => data, 
-  defaultSubmitName
-} = {}) => (options, next, scraper) =>
-  next().then(result => {
+class FormEnhancer {
+  constructor({
+    convert = data => data, 
+    unconvert = data => data, 
+    defaultSubmitName
+  } = {}) {
+    this.convert = convert
+    this.unconvert = unconvert
+    this.defaultSubmitName = defaultSubmitName
+  }
+  
+  handle(result, options, scraper) {
     if(!result.$) throw 'The cheerio enhancer needs to be added before the form enhancer.'
     
     const parsedForm = parseForm(result.$)
-    const data = convert(parsedForm.strippedData)
+    const data = this.convert(parsedForm.strippedData)
+
     return {
       ...result,
       form: {
         data,
-        submit: (data, submitName = defaultSubmitName, submitOptions) => {
+        submit: (data, submitName = this.defaultSubmitName, submitOptions) => {
           return scraper.post({
             ...options,
             ...submitOptions,
             form: {
               ...parsedForm.unstrippedData,
-              ...parsedForm.unstrip(unconvert(data)),
+              ...parsedForm.unstrip(this.unconvert(data)),
               ...parsedForm.submits[submitName]
             }
           })
         }
       }
-    }
-  })
+    }  
+  }
+}
+
+const formEnhancer = (options) => {
+  const enhancer = new FormEnhancer(options)
+  return (options, next, scraper) =>
+    next.then(result => enhancer.handle(result, options, scraper))
+}
 
 export default formEnhancer
+export { FormEnhancer }

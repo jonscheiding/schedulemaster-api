@@ -1,9 +1,12 @@
 import cheerio from 'cheerio'
 import { chai, expect } from 'test-setup'
 
-import { form as formEnhancer } from 'scraper/enhancers'
+import { FormEnhancer } from 'scraper/enhancers/form-enhancer'
 
 describe('formEnhancer', () => {
+  const someHtml = '<form><input type="text" name="input1" value="value1"></form>'
+  const someOptions = {}
+  
   it('should extract the input fields into a form.data object', () => {
     const $ = cheerio.load(`<form>
       <input type="text" name="input1" value="value1">
@@ -15,9 +18,9 @@ describe('formEnhancer', () => {
       </select>
     </form>`)
     
-    const result = formEnhancer()({}, () => Promise.resolve({ result: {$} }))
+    const result = new FormEnhancer().handle({$})
 
-    expect(result).to.eventually.have.deep.property('form.data')
+    expect(result).to.have.deep.property('form.data')
       .and.deep.equal({
         input1: 'value1',
         input2: 'value2',
@@ -31,7 +34,7 @@ describe('formEnhancer', () => {
       <input type="text" name="input1">
     </form>`)
     
-    const result = formEnhancer().result({$})
+    const result = new FormEnhancer().handle({$})
     
     expect(result).to.have.deep.property('form.data')
       .and.deep.equal({input1: null})
@@ -45,7 +48,7 @@ describe('formEnhancer', () => {
       <input type="radio" name="input4" value="on">
     </form>`)
     
-    const result = formEnhancer().result({$})
+    const result = new FormEnhancer().handle({$})
     
     expect(result).to.have.deep.property('form.data')
       .and.deep.equal({
@@ -61,7 +64,7 @@ describe('formEnhancer', () => {
       <input type="text" name="ctl00$ctl11$input1" value="value1">
     </form>`)
     
-    const result = formEnhancer().result({$})
+    const result = new FormEnhancer().handle({$})
     
     expect(result).to.have.deep.property('form.data')
       .and.deep.equal({input1: 'value1'})
@@ -75,7 +78,7 @@ describe('formEnhancer', () => {
       <input type="hidden" name="__EVENTARGUMENT" value="eventargument">
     </form>`)
 
-    const result = formEnhancer().result({$})
+    const result = new FormEnhancer().handle({$})
     
     expect(result).to.have.deep.property('form.data')
       .and.deep.equal({input1: 'value1'})
@@ -87,7 +90,7 @@ describe('formEnhancer', () => {
       <input type="submit" name="submit" value="submit">
     </form>`)   
     
-    const result = formEnhancer().result({$})
+    const result = new FormEnhancer().handle({$})
     
     expect(result).to.have.deep.property('form.data')
       .and.deep.equal({input1: 'value1'}) 
@@ -95,9 +98,9 @@ describe('formEnhancer', () => {
   
   it('should use convert if provided', () => {
     const convert = chai.spy(data => data)
-    const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+    const $ = cheerio.load(someHtml)
     
-    formEnhancer({convert}).result({$})
+    new FormEnhancer({convert}).handle({$})
       
     return expect(convert).to.have.been.called.with({input1: 'value1'})
   })
@@ -105,17 +108,17 @@ describe('formEnhancer', () => {
   it('should use the return value of convert', () => {
     const convertedData = {}
     const convert = () => convertedData
-    const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+    const $ = cheerio.load(someHtml)
         
-    const result = formEnhancer({convert}).result({$})
+    const result = new FormEnhancer({convert}).handle({$})
     
     return expect(result).to.have.deep.property('form.data').equal(convertedData)
   })
   
   it('should add a submit method to the result', () => {
-    const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+    const $ = cheerio.load(someHtml)
     
-    const result = formEnhancer().result({$})
+    const result = new FormEnhancer().handle({$})
     
     return expect(result)
       .to.have.deep.property('form.submit')
@@ -125,9 +128,9 @@ describe('formEnhancer', () => {
   describe('submit()', () => {
     it('should post the provided data to the original scraper', () => {
       const scraper = {post: chai.spy()}
-      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      const $ = cheerio.load(someHtml)
       
-      const result = formEnhancer().result({$}, null, scraper)
+      const result = new FormEnhancer().handle({$}, someOptions, scraper)
       result.form.submit({input1: 'value2'})
       
       return expect(scraper.post)
@@ -138,9 +141,9 @@ describe('formEnhancer', () => {
     it('should use unconvert if provided', () => {
       const unconvert = chai.spy(data => data)
       const scraper = {post: chai.spy()}
-      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      const $ = cheerio.load(someHtml)
       
-      const result = formEnhancer({unconvert}).result({$}, null, scraper)
+      const result = new FormEnhancer({unconvert}).handle({$}, someOptions, scraper)
       result.form.submit({input1: 'value2'})
       
       expect(unconvert).to.have.been.called
@@ -151,7 +154,7 @@ describe('formEnhancer', () => {
       const scraper = {post: chai.spy()}
       const $ = cheerio.load('<form><input type="text" name="ctl00$ctl00$input1" value="value1"></form>')  
       
-      const result = formEnhancer().result({$}, null, scraper)
+      const result = new FormEnhancer().handle({$}, someOptions, scraper)
       result.form.submit({input1: 'value2'})
       
       return expect(scraper.post)
@@ -168,7 +171,7 @@ describe('formEnhancer', () => {
         <input type="hidden" name="__EVENTARGUMENT" value="eventargument">
       </form>`)
       
-      const result = formEnhancer().result({$}, null, scraper)
+      const result = new FormEnhancer().handle({$}, someOptions, scraper)
       result.form.submit({input1: 'value2'})
       
       return expect(scraper.post)
@@ -186,7 +189,7 @@ describe('formEnhancer', () => {
       const scraper = {post: () => postResult}
       const $ = cheerio.load('<form><input type="text" name="ctl00$ctl00$input1" value="value1"></form>')      
       
-      const result = formEnhancer().result({$}, null, scraper)
+      const result = new FormEnhancer().handle({$}, someOptions, scraper)
       const submitResult = result.form.submit({})
       
       expect(submitResult).to.equal(postResult)      
@@ -199,7 +202,7 @@ describe('formEnhancer', () => {
         <input type="submit" name="submitbutton" value="submitme">
       </form>`)
       
-      const result = formEnhancer().result({$}, null, scraper)
+      const result = new FormEnhancer().handle({$}, someOptions, scraper)
       result.form.submit({input1: 'value1'}, 'submitbutton')
       
       return expect(scraper.post).to.have.been.called.with({ form: {
@@ -215,7 +218,7 @@ describe('formEnhancer', () => {
         <input type="text" name="input2" value="value2">
       </form>`)
       
-      const result = formEnhancer().result({$}, null, scraper)
+      const result = new FormEnhancer().handle({$}, someOptions, scraper)
       result.form.submit({input1: 'value1`'})
       
       return expect(scraper.post).to.have.been.called.with({ form: {
@@ -226,9 +229,9 @@ describe('formEnhancer', () => {
     
     it('should pass original options to post() if they exist', () => {
       const scraper = {post: chai.spy()}
-      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      const $ = cheerio.load(someHtml)
       
-      const result = formEnhancer().result({$}, {other: 'options'}, scraper)
+      const result = new FormEnhancer().handle({$}, {other: 'options'}, scraper)
       result.form.submit({})
       
       return expect(scraper.post).to.have.been.called.with({ 
@@ -239,9 +242,9 @@ describe('formEnhancer', () => {
     
     it('should pass additional options to post() if they are provided', () => {
       const scraper = {post: chai.spy()}
-      const $ = cheerio.load('<form><input type="text" name="input1" value="value1"></form>')
+      const $ = cheerio.load(someHtml)
       
-      const result = formEnhancer().result({$}, null, scraper)
+      const result = new FormEnhancer().handle({$}, someOptions, scraper)
       result.form.submit({}, null, {other: 'options'})
       
       return expect(scraper.post).to.have.been.called.with({ 
