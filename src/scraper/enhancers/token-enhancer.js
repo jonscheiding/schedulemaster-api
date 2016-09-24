@@ -12,7 +12,7 @@ export default (options, next) => {
   const { token, ...optionsWithoutToken } = options
   options = deepmerge(
     optionsWithoutToken,
-    { qs: token.query }
+    { qs: token.session }
   )
   
   return next(options)

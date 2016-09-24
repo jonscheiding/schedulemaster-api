@@ -3,7 +3,8 @@ import passport from 'passport'
 import { Strategy as ClientPasswordStrategy } from 'passport-oauth2-client-password'
 import { BasicStrategy } from 'passport-http'
 
-import { parse } from 'token'
+import { logger } from 'logging'
+import Tokener from 'tokener'
 
 const isValidClient = (username, password, done) => {
   //
@@ -15,6 +16,7 @@ const isValidClient = (username, password, done) => {
   ) {
     done(null, username)
   } else {
+    logger.warn(`Invalid client credentials for ${username}.`)
     done(null, false)
   }
 }
@@ -27,20 +29,5 @@ export const authenticateClient = () =>
 
 export const authenticateToken = () => [
   bearerToken(),
-  (req, res, next) => {
-    if(!req.token) {
-      res.status(401).send({message: 'Authentication required.'})
-      return
-    }
-    
-    parse(req.token)
-      .then(parsedToken => {
-        req.token = parsedToken
-        next()
-      })
-      .catch(err => req
-        .status(500)
-        .send({error: err.toString()})
-      )
-  }
+  Tokener.middleware()
 ]

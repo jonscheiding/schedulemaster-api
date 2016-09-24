@@ -11,7 +11,7 @@ describe('tokenEnhancer', () => {
     tokenEnhancer(options, next)
     
     expect(next).to.have.been.called.with({
-      qs: options.token.query
+      qs: options.token.session
     })
   })
   
@@ -22,7 +22,7 @@ describe('tokenEnhancer', () => {
     tokenEnhancer(options, next)
     
     expect(next).to.have.been.called.with({
-      qs: {...options.token.query, ...options.qs}
+      qs: {...options.token.session, ...options.qs}
     })
   })
   

@@ -1,7 +1,7 @@
 import oauth2orize from 'oauth2orize'
 
 import { loginPage } from 'pages'
-import { stringify } from 'token'
+import Tokener from 'tokener'
 
 const server = oauth2orize.createServer()
 
@@ -14,10 +14,10 @@ server.exchange(oauth2orize.exchange.password(
           return
         }
         
-        return stringify({
+        return Tokener.stringify({
           username,
           client,
-          query: result
+          session: result
         }).then(tokenStr => done(null, tokenStr))
       })
       .catch(error => done({message: error.toString()}))
