@@ -1,5 +1,6 @@
 import oauth2orize from 'oauth2orize'
 
+import { logger } from 'logging'
 import { loginPage } from 'pages'
 import Tokener from 'tokener'
 
@@ -14,11 +15,13 @@ server.exchange(oauth2orize.exchange.password(
           return
         }
         
-        return Tokener.stringify({
+        const token = {
           username,
           client,
           session: result
-        }).then(tokenStr => done(null, tokenStr))
+        }
+
+        return Tokener.stringify(token).then(tokenStr => done(null, tokenStr))
       })
       .catch(error => done({message: error.toString()}))
   }

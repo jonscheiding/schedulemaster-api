@@ -1,9 +1,12 @@
-import { cleanEnv, str } from 'envalid'
+import { cleanEnv, str, num } from 'envalid'
 import jwt from 'jsonwebtoken'
 import createEncrypter from 'object-encrypter'
 import yup from 'yup'
 
-const env = cleanEnv(process.env, { TOKEN_SECRET: str() })
+const env = cleanEnv(process.env, { 
+  TOKEN_SECRET: str(),
+  TOKEN_EXPIRATION: num({default: null})
+})
 
 const tokenSchema = yup.object().noUnknown().shape({
   username: yup.string().required(),
@@ -14,8 +17,9 @@ const tokenSchema = yup.object().noUnknown().shape({
 })
 
 class Tokener {
-  constructor(secret) {
+  constructor(secret, options = {}) {
     this.secret = secret
+    this.options = options
     this.encrypter = createEncrypter(secret)
     
     //
@@ -27,7 +31,19 @@ class Tokener {
     }
   }
   
+  getTokenExpiration() {
+    if(!this.options.expiration) return undefined
+    
+    const now = Math.floor(Date.now() / 1000)
+    return now + this.options.expiration
+  }
+  
   stringify(token) {
+    token = {
+      exp: this.getTokenExpiration(),
+      ...token
+    }
+
     return tokenSchema.validate(token, {strict: true}).then(validatedToken => {
       const encryptedSession = this.encrypter.encrypt(validatedToken.session)
       validatedToken = {
@@ -66,7 +82,7 @@ class Tokener {
         })
         .catch(err => res
           .status(400)
-          .send({error: err.toString()})
+          .send({error: err})
         )
     }
   }
@@ -74,5 +90,5 @@ class Tokener {
 
 export { Tokener }
 
-const defaultTokener = new Tokener(env.TOKEN_SECRET)
+const defaultTokener = new Tokener(env.TOKEN_SECRET, {expiration: env.TOKEN_EXPIRATION})
 export default defaultTokener

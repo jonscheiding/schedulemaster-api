@@ -29,6 +29,29 @@ describe('Token', () => {
       return expect(result.log()).to.eventually.be.not.null
     })
     
+    it('should include the expiration date if one was provided', () => {
+      const result = tokener.stringify({...sampleToken, exp: 3600})
+        .then(jwt.decode)
+        
+      expect(result).to.eventually.have.property('exp', 3600)
+    })
+    
+    it('should include the default expiration date if there is one', () => {
+      const result = new Tokener('some_secret', {expiration: 3600})
+        .stringify(sampleToken)
+        .then(jwt.decode)
+
+      return expect(result).to.eventually.have.property('exp', 3600)
+    })
+    
+    it('should override the default expiration with the provided one', () => {
+      const result = new Tokener('some_secret', {expiration: 3600})
+        .stringify({...sampleToken, exp: 7200})
+        .then(jwt.decode)
+
+      expect(result).to.eventually.have.property('exp', 7200)
+    })
+    
     it('should include the username and client in the JWT payload', () => {
       const result = tokener.stringify(sampleToken)
         .then(jwt.decode)
@@ -126,6 +149,18 @@ describe('Token', () => {
       const result = tokener.parse(badToken)
       
       return expect(result.log()).to.eventually.be.rejected
+    })
+    
+    it('should reject if the token is expired', () => {
+      const badToken = {...sampleToken,
+        iat: Date.now() - 100,
+        exp: 10
+      }
+      
+      const result = tokener.stringify(badToken)
+        .then(tokener.parse)
+        
+      expect(result.log()).to.eventually.be.rejected
     })
   })
 })

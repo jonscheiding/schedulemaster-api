@@ -14,7 +14,7 @@ const expect = chai.expect
 Promise.prototype.log = function() {
   return this
     .then(value => {
-      mlog.log(value)
+      mlog.log(JSON.stringify(value))
       return value
     })
     .catch(err => {
