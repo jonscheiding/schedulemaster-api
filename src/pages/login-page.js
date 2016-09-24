@@ -3,7 +3,7 @@ import url from 'url'
 import { createScraper } from 'scraper'
 import { logger } from 'logging'
 
-const loginResult = (response, options) => {
+const getLoginResult = (response, options) => {
   const username = options.form.USERID
       
   if(!response.headers['location']) {
@@ -28,14 +28,27 @@ const loginResult = (response, options) => {
   })
 }
 
+const getLoginFormData = (username, password) => ({
+  USERID: username,
+  DATA: password,
+  CMD: 'LOGIN'
+})
 
 const scraper = createScraper(
   {
     url: 'https://my.schedulemaster.com/login.asp',
     followRedirect: false
   },
-  (options, next) => next().then(
-    result => loginResult(result.response, options))
+  (options, next) => {
+    const { username, password, ...optionsWithoutCredentials } = options
+    options = {
+      ...optionsWithoutCredentials,
+      form: getLoginFormData(username, password)
+    }
+    
+    return next(options).then(
+      result => getLoginResult(result.response, options))
+  }
 )
 
 export default {
