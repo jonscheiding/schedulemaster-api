@@ -81,8 +81,8 @@ class Tokener {
           next()
         })
         .catch(err => res
-          .status(400)
-          .send({error: err})
+          .status(403)
+          .send({message: 'Invalid access token.'})
         )
     }
   }
