@@ -13,7 +13,7 @@ const exchangeForToken = (client, username, password, scope, done) => {
         return
       }
       
-      const token = { username, client, session: result }
+      const token = { username, client, scope, session: result }
       
       return Tokener.stringify(token).then(tokenStr => {
         const refreshTokenStr = Tokener.encrypter.encrypt({token, username, password})

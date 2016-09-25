@@ -12,6 +12,7 @@ const env = cleanEnv(process.env, {
 
 const tokenSchema = yup.object().noUnknown().shape({
   username: yup.string().required(),
+  scope: yup.array().of(yup.string()).required(),
   client: yup.string(),
   exp: yup.number(),
   iat: yup.number(),

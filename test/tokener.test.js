@@ -13,6 +13,7 @@ describe('Token', () => {
   beforeEach(() => {
     sampleToken = {
       username: 'user',
+      scope: ['scope'],
       client: 'client',
       session: { key: 'value' }
     }
