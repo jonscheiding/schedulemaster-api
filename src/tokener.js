@@ -3,9 +3,11 @@ import jwt from 'jsonwebtoken'
 import createEncrypter from 'object-encrypter'
 import yup from 'yup'
 
+import { logger } from 'logging'
+
 const env = cleanEnv(process.env, { 
   TOKEN_SECRET: str(),
-  TOKEN_EXPIRATION: num({default: null})
+  TOKEN_EXPIRATION: num({default: 0})
 })
 
 const tokenSchema = yup.object().noUnknown().shape({
@@ -21,6 +23,10 @@ class Tokener {
     this.secret = secret
     this.options = options
     this.encrypter = createEncrypter(secret)
+    
+    if(this.options.expiration == 0) {
+      this.options.expiration = undefined
+    }
     
     //
     // These are necessary otherwise this can change depending on how the methods
@@ -80,10 +86,10 @@ class Tokener {
           req.token = parsedToken
           next()
         })
-        .catch(err => res
-          .status(403)
-          .send({message: 'Invalid access token.'})
-        )
+        .catch(err => {
+          logger.warn(err, 'Problem parsing token.')
+          res.status(403).send({message: 'Invalid access token.'})
+        })
     }
   }
 }

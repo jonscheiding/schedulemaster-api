@@ -5,15 +5,18 @@ import { expect } from 'test-setup'
 
 import { Tokener } from 'tokener'
 
-const sampleToken = {
-  username: 'user',
-  client: 'client',
-  session: { key: 'value' }
-}
-
 describe('Token', () => {
   const tokener = new Tokener('some_secret')
   const encrypter = createEncrypter('some_secret')
+  let sampleToken
+  
+  beforeEach(() => {
+    sampleToken = {
+      username: 'user',
+      client: 'client',
+      session: { key: 'value' }
+    }
+  })
   
   describe('stringify()', () => {
     it('should resolve when called with a valid token', () => {
@@ -41,15 +44,15 @@ describe('Token', () => {
         .stringify(sampleToken)
         .then(jwt.decode)
 
-      return expect(result).to.eventually.have.property('exp', 3600)
+      return expect(result).to.eventually.have.property('exp').and.is.a('number')
     })
     
     it('should override the default expiration with the provided one', () => {
       const result = new Tokener('some_secret', {expiration: 3600})
-        .stringify({...sampleToken, exp: 7200})
+        .stringify({...sampleToken, exp: 999999})
         .then(jwt.decode)
 
-      expect(result).to.eventually.have.property('exp', 7200)
+      expect(result).to.eventually.have.property('exp', 999999)
     })
     
     it('should include the username and client in the JWT payload', () => {

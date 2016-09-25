@@ -17,7 +17,7 @@ const exchangeForToken = (client, username, password, scope, done) => {
       
       return Tokener.stringify(token).then(tokenStr => {
         const refreshTokenStr = Tokener.encrypter.encrypt({token, username, password})
-        done(null, tokenStr, refreshTokenStr)
+        done(null, tokenStr, refreshTokenStr, {expires_in: Tokener.options.expiration})
       })
     })
     .catch(error => done({message: error.toString()}))
