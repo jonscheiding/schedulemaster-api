@@ -23,8 +23,14 @@ const getLoginResult = (response, options) => {
   }
 
   return Promise.resolve({
-    userid: redirectUrl.query.userid,
-    session: redirectUrl.query.session
+    credentials: {
+      username: options.form.USERID,
+      password: options.form.DATA
+    },
+    session: {
+      userid: redirectUrl.query.userid,
+      session: redirectUrl.query.session
+    }
   })
 }
 

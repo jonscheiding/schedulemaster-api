@@ -13,11 +13,13 @@ const exchangeForToken = (client, username, password, scope, done) => {
         return
       }
       
-      const token = { username, client, scope, session: result }
+      const { session, credentials } = result
       
-      return Tokener.stringify(token).then(tokenStr => {
-        const refreshTokenStr = Tokener.encrypter.encrypt({token, username, password})
-        done(null, tokenStr, refreshTokenStr, {expires_in: Tokener.options.expiration})
+      const accessToken = { username, client, scope, session }
+      
+      return Tokener.stringify(accessToken).then(accessTokenStr => {
+        const refreshTokenStr = Tokener.encrypter.encrypt({ accessToken: accessTokenStr, credentials })
+        done(null, accessTokenStr, refreshTokenStr, {expires_in: Tokener.options.expiration})
       })
     })
     .catch(error => done({message: error.toString()}))
@@ -27,7 +29,8 @@ server.exchange(oauth2orize.exchange.password(exchangeForToken))
 
 server.exchange(oauth2orize.exchange.refreshToken((client, refreshToken, scope, done) => {
   try {
-    const {username, password} = Tokener.encrypter.decrypt(refreshToken)
+    const { credentials } = Tokener.encrypter.decrypt(refreshToken)
+    const { username, password } = credentials
     exchangeForToken(client, username, password, scope, done)
   } catch(err) { 
     done(null, false)
