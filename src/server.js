@@ -1,8 +1,8 @@
 import { logger } from 'logging'
-import express from 'express'
 import bodyParser from 'body-parser'
-import expressPromise from 'express-promise'
 import bunyanMiddleware from 'bunyan-middleware'
+import express from 'express'
+import expressPromise from 'express-promise'
 
 import api from 'api'
 

@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <title>Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.9.13/sass.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
+    <style>
+      /* Crappy means of getting some of the colors right.  Revisit this and use SASS somehow. */
+      input:not([type]):focus:not([readonly]), input[type=text]:focus:not([readonly]), input[type=password]:focus:not([readonly]), input[type=email]:focus:not([readonly]), input[type=url]:focus:not([readonly]), input[type=time]:focus:not([readonly]), input[type=date]:focus:not([readonly]), input[type=datetime]:focus:not([readonly]), input[type=datetime-local]:focus:not([readonly]), input[type=tel]:focus:not([readonly]), input[type=number]:focus:not([readonly]), input[type=search]:focus:not([readonly]), textarea.materialize-textarea:focus:not([readonly]) {
+        border-bottom: 1px solid #3f51b5;
+        color: #3f51b5;
+      }
+      input:not([type]):focus:not([readonly])+label, input[type=text]:focus:not([readonly])+label, input[type=password]:focus:not([readonly])+label, input[type=email]:focus:not([readonly])+label, input[type=url]:focus:not([readonly])+label, input[type=time]:focus:not([readonly])+label, input[type=date]:focus:not([readonly])+label, input[type=datetime]:focus:not([readonly])+label, input[type=datetime-local]:focus:not([readonly])+label, input[type=tel]:focus:not([readonly])+label, input[type=number]:focus:not([readonly])+label, input[type=search]:focus:not([readonly])+label, textarea.materialize-textarea:focus:not([readonly])+label {
+        color: #3f51b5;
+      }
+    </style>
+  </head>
+  <body class="container yellow lighten-4">
+    <div class="row">
+      <div class="col s12 m8 offset-m2">
+        <div class="card">
+          <form method="POST">
+            <div class="card-content black-text">
+              <span class="card-title indigo-text">
+                <b>Schedule Master</b>
+                <img src="https://my.schedulemaster.com/images/smlogo.gif" class="right">
+              </span>
+              <p>Please login with your Schedule Master username and password.</p>
+              <div class="row">
+                <div class="input-field col s12">
+                  <input id="username" name="username" type="text">
+                  <label for="username">Username</label>
+                </div>
+                <div class="input-field col s12">
+                  <input id="password" name="password" type="password">
+                  <label for="password">Password</label>
+                </div>
+              </div>
+            </div>
+            <div class="card-action right-align">
+              <input type="submit" value="Login" class="btn indigo lighten-1">
+            </div>
+          </form>
+        </div>  
+      </div>
+    </div>
+  </body>
+</html>
