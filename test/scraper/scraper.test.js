@@ -1,6 +1,6 @@
 import nock from 'nock'
 
-import { expect, chai } from 'test-setup'
+import { expect } from 'test-setup'
 
 import { Scraper } from 'scraper'
 
