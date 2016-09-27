@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser'
 import express from 'express'
+import { ensureLoggedIn } from 'connect-ensure-login'
 
 import { passport } from 'config'
 import oauth2orize from './oauth2orize'
@@ -8,12 +9,7 @@ const api = express.Router()
 api.use(bodyParser.urlencoded({extended: false}))
 
 api.use('/authorize',
-  (req, res, next) => {
-    req.user = {
-      credentials: { username: 'test', password: 'test' }
-    }
-    next()
-  },
+  ensureLoggedIn('./login'),
   //
   // TODO: Validate the client ID I guess
   //
@@ -31,5 +27,21 @@ api.get('/check',
   passport.authenticateToken(),
   (req, res) => res.send(req.user)
 )
+
+api.get('/login', (req, res) => res.render('login'))
+
+api.post('/login',
+  (req, res, next) => {
+    passport.authenticateUser((err, user) => {
+      if(!user) {
+        return res.render('login', { loginFailed: true, ...req.body })
+      }
+      
+      req.logIn(user, next)
+    })(req, res, next)
+  },
+  (req, res) => res.redirect(req.session.returnTo)
+)
+
 
 export default api

@@ -13,7 +13,7 @@ export default () => {
   
   app.engine('mustache', mustacheExpress())
   app.set('view engine', 'mustache')
-  app.set('views', path.resolve(__dirname, 'ui/views'))
+  app.set('views', path.resolve(__dirname, '../views'))
 
   app.use(bodyParser.json(), bunyanMiddleware(logger), expressPromise())
   app.use(expressSession({ resave: false, saveUninitialized: true, secret: 'TODO' }))
