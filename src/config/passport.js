@@ -7,7 +7,7 @@ import { Strategy as ClientPasswordStrategy } from 'passport-oauth2-client-passw
 
 import { logger } from 'logging'
 import { loginPage } from 'pages'
-import Tokener from 'tokener'
+import { AccessToken } from 'tokens'
 
 passport.serializeUser((user, done) => done(null, user))
 passport.deserializeUser((user, done) => done(null, user))
@@ -28,7 +28,7 @@ passport.use('user', new LocalStrategy(
 
 passport.use('token', new BearerStrategy(
   (token, done) => {
-    Tokener.parse(token)  
+    AccessToken.parse(token)  
       .then(result => done(null, result))
       .catch(err => done(null, false, err))
   }

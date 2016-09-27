@@ -14,7 +14,8 @@ api.use('/authorize',
   // TODO: Validate the client ID I guess
   //
   oauth2orize.authorization((clientId, redirectUri, done) => done(null, clientId, redirectUri)),
-  oauth2orize.decision((req, done) => done(null, { scope: [req.query.scope] }))
+  oauth2orize.decision((req, done) => done(null, { scope: [req.query.scope] })),
+  oauth2orize.errorHandler()
 )
 
 api.use('/token',

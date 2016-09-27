@@ -2,7 +2,7 @@ import oauth2orize from 'oauth2orize'
 
 import { logger } from 'logging'
 import { loginPage } from 'pages'
-import Tokener from 'tokener'
+import { AccessToken, RefreshToken, AuthorizationCode } from 'tokens'
 
 const server = oauth2orize.createServer()
 
@@ -11,14 +11,15 @@ server.deserializeClient((client, done) => done(null, client))
 
 server.grant(oauth2orize.grant.code(
   (client, redirectUri, user, options, done) => {
-    const code = Tokener.encrypt({
-      client,
-      uri: redirectUri,
-      credentials: user.credentials,
-      scope: options.scope
-    })
-    
-    done(null, code)
+    AuthorizationCode
+      .stringify({
+        client,
+        uri: redirectUri,
+        credentials: user.credentials,
+        scope: options.scope
+      })
+      .then(({codeStr}) => done(null, codeStr))
+      .catch(done)
   }
 ))
 
@@ -28,28 +29,22 @@ server.exchange(oauth2orize.exchange.password(
 ))
 
 server.exchange(oauth2orize.exchange.refreshToken(
-  (client, refreshToken, scope, done) => {
-    try {
-      const { credentials } = Tokener.decrypt(refreshToken)
-      exchangeCredentialsForToken(client, credentials, scope, done)
-    } catch(err) { 
-      done(null, false, err)
-      return
-    }
-  }
+  (client, refreshToken, scope, done) =>
+    RefreshToken
+      .parse(refreshToken)
+      .then(({credentials}) => 
+        exchangeCredentialsForToken(client, credentials, scope, done))
+      .catch(err => done(null, false, err.toString()))
 ))
 
 server.exchange(oauth2orize.exchange.code(
   (client, code, redirectUri, done) => {
-    try {
-      const { credentials, uri, scope } = Tokener.decrypt(code)
-      if(redirectUri != uri) return done(null, false)
-      
-      exchangeCredentialsForToken(client, credentials, scope, done)
-    } catch(err) {
-      done(null, false, err)
-      return
-    }
+    AuthorizationCode.parse(code)
+      .then(({ credentials, uri, scope }) => {
+        if(redirectUri != uri) return done(null, false)        
+        exchangeCredentialsForToken(client, credentials, scope, done)
+      })
+      .catch(err => done(null, false, err))
   }
 ))
 
@@ -64,11 +59,14 @@ const exchangeCredentialsForToken = (client, credentials, scope, done) => {
       const { session, credentials } = result
       
       const accessToken = { username: credentials.username, client, scope, session }
-
-      return Tokener.stringify(accessToken).then(accessTokenStr => {
-        const refreshTokenStr = Tokener.encrypt({ ts: Date.now(), credentials })
-        done(null, accessTokenStr, refreshTokenStr, {expires_in: Tokener.options.expiration})
-      })
+      const refreshToken = { credentials, scope }
+      
+      return Promise.all([
+        AccessToken.stringify(accessToken),
+        RefreshToken.stringify(refreshToken)
+      ]).then(([accessToken, refreshToken]) =>
+        done(null, accessToken.tokenStr, refreshToken.tokenStr, {expires_in: accessToken.expiresIn})
+      )
     })
     .catch(error => {
       logger.error({err: error})
