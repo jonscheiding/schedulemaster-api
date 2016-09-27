@@ -1,3 +1,4 @@
+import 'array-sugar'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
 import BearerStrategy from 'passport-http-bearer'
@@ -51,9 +52,24 @@ const isValidClient = (username, password, done) => {
 passport.use('client-basic', new BasicStrategy(isValidClient))
 passport.use('client-oauth2-body', new ClientPasswordStrategy(isValidClient))
 
+const requireScope = (scope) => (req, res, next) => {
+  if(!scope) next()
+  if(!req.user.scope || !req.user.scope.contains(scope)) {
+    return res.status(401).send({ message: 'Token is not valid for this resource.' })
+  }
+  
+  next()
+}
+
 export default {
   authenticateClient: (options) => passport.authenticate(['client-basic', 'client-oauth2-body'], options),
   authenticateUser: (options) => passport.authenticate('user', options),
-  authenticateToken: (options) => passport.authenticate('token', { session: false, ...options} ),
+  authenticateToken: (options = {}) => {
+    const { requiredScope, ...otherOptions } = options
+    return [
+      passport.authenticate('token', { session: false, ...otherOptions } ),
+      requireScope(requiredScope)
+    ]
+  },
   initialize: () => [ passport.initialize(), passport.session() ]
 }

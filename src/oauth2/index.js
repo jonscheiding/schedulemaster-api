@@ -24,7 +24,7 @@ api.use('/token',
 )
 
 api.get('/check',
-  passport.authenticateToken(),
+  passport.authenticateToken({requiredScope: 'login'}),
   (req, res) => res.send(req.user)
 )
 
