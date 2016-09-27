@@ -3,8 +3,6 @@ import jwt from 'jsonwebtoken'
 import createEncrypter from 'object-encrypter'
 import yup from 'yup'
 
-import { logger } from 'logging'
-
 const env = cleanEnv(process.env, { 
   TOKEN_SECRET: str(),
   TOKEN_EXPIRATION: num({default: 0})
@@ -73,25 +71,6 @@ class Tokener {
       ...verifiedToken,
       session: decryptedSession
     })
-  }
-  
-  middleware() {
-    return (req, res, next) => {
-      if(!req.token) {
-        res.status(401).send({message: 'Authentication required.'})
-        return
-      }
-      
-      this.parse(req.token)
-        .then(parsedToken => {
-          req.token = parsedToken
-          next()
-        })
-        .catch(err => {
-          logger.warn(err, 'Problem parsing token.')
-          res.status(403).send({message: 'Invalid access token.'})
-        })
-    }
   }
 }
 

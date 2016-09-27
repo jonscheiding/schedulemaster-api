@@ -1,10 +1,10 @@
 import cheerio from './cheerio-enhancer'
 import form from './form-enhancer'
-import token from './token-enhancer'
+import smSession from './sm-session-enhancer'
 
-export { cheerio, form, token }
+export { cheerio, form, smSession }
 
 export const defaults = [
-  token,
+  smSession,
   cheerio
 ]

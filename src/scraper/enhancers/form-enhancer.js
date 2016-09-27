@@ -97,7 +97,7 @@ class FormEnhancer {
 const formEnhancer = (options) => {
   const enhancer = new FormEnhancer(options)
   return (options, next, scraper) =>
-    next.then(result => enhancer.handle(result, options, scraper))
+    next().then(result => enhancer.handle(result, options, scraper))
 }
 
 export default formEnhancer

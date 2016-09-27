@@ -1,28 +1,28 @@
 import { expect, chai } from 'test-setup'
-import { token as tokenEnhancer } from 'scraper/enhancers'
+import { smSession as smSessionEnhancer } from 'scraper/enhancers'
 
-describe('tokenEnhancer', () => {
-  const token = {session: {ab: 'cd'}}
+describe('smSessionEnhancer', () => {
+  const session = {ab: 'cd'}
   
   it('should set the token session as the query string', () => {
-    const options = { token }
+    const options = { session }
     const next = chai.spy()
     
-    tokenEnhancer(options, next)
+    smSessionEnhancer(options, next)
     
     expect(next).to.have.been.called.with({
-      qs: options.token.session
+      qs: options.session
     })
   })
   
   it('should add the token session to the query string if it already exists', () => {
-    const options = { token, qs: {ef: 'gh'} }
+    const options = { session, qs: {ef: 'gh'} }
     const next = chai.spy()
     
-    tokenEnhancer(options, next)
+    smSessionEnhancer(options, next)
     
     expect(next).to.have.been.called.with({
-      qs: {...options.token.session, ...options.qs}
+      qs: {...options.session, ...options.qs}
     })
   })
   
@@ -30,7 +30,7 @@ describe('tokenEnhancer', () => {
     const options = {}
     const next = chai.spy()
     
-    tokenEnhancer(options, next)
+    smSessionEnhancer(options, next)
     
     expect(next).to.have.been.called.with(options)
   })

@@ -8,7 +8,7 @@ export default api
 api.get('/user', (req, res) => {
   res.send({
     data: {
-      username: req.token.username,
+      username: req.user.username,
     },
     links: {
       info: '/user/info',
@@ -18,12 +18,12 @@ api.get('/user', (req, res) => {
 })
 
 api.get('/user/info', (req, res) => {
-  res.promise(page(req.token).then(r => r.form.data))
+  res.promise(page(req.user.session).then(r => r.form.data))
 })
 
 api.post('/user/info', (req, res) => {
   res.promise(
-    page(req.token)
+    page(req.user.session)
       .then(r => r.form.submit(req.body))
       .then(r => {
         if(r.errors) {

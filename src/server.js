@@ -1,22 +1,13 @@
 import { logger } from 'logging'
-import bodyParser from 'body-parser'
-import bunyanMiddleware from 'bunyan-middleware'
-import express from 'express'
-import expressPromise from 'express-promise'
-import mustacheExpress from 'mustache-express'
-import path from 'path'
+import { express, passport } from 'config'
 
+import oauth2 from 'oauth2'
 import api from 'api'
-import ui from 'ui'
 
 const app = express()
-app.use(bodyParser.json(), bunyanMiddleware(logger), expressPromise())
-app.use('/ui', ui)
-app.use(api)
-
-app.engine('mustache', mustacheExpress())
-app.set('view engine', 'mustache')
-app.set('views', path.resolve(__dirname, 'ui/views'))
+app.use(passport.initialize())
+app.use('/oauth2', oauth2)
+app.use('/api', api)
 
 export const start = port => {
   app.listen(port)

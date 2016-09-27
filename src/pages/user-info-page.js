@@ -77,4 +77,4 @@ const scraper = createScraper(
   )
 )
 
-export default (token) => scraper.get({token})
+export default (session) => scraper.get({session})
