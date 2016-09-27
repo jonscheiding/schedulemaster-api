@@ -19,10 +19,10 @@ server.grant(oauth2orize.grant.code(
         credentials: user.credentials,
         scope: options.scope
       })
-      .then(({codeStr}) => done(null, codeStr))
+      .then(({tokenStr}) => done(null, tokenStr))
       .catch(err => {
         logger.error({err}, 'Error generating authorization code.')
-        done
+        done(null, false)
       })
   }
 ))
@@ -86,6 +86,7 @@ const exchangeCredentialsForToken = (client, credentials, scope, done) => {
   loginPage.post(credentials)
     .then(result => {
       if(!result) {
+        logger.warn('Schedule Master login failed.')
         return done(null, false)
       }
       
