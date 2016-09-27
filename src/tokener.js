@@ -22,6 +22,8 @@ class Tokener {
     this.secret = secret
     this.options = options
     this.encrypter = createEncrypter(secret)
+    this.encrypt = this.encrypter.encrypt
+    this.decrypt = this.encrypter.decrypt
     
     if(this.options.expiration == 0) {
       this.options.expiration = undefined
