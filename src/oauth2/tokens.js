@@ -114,6 +114,7 @@ class AccessToken extends Token {
 class RefreshToken extends Token { 
   constructor(secret, options = {}) {
     const schema = yup.object().noUnknown().shape({
+      client: yup.string().required(),
       credentials: yup.object().required(),
       scope: yupx.scope().required()
     })
@@ -125,6 +126,7 @@ class RefreshToken extends Token {
 class AuthorizationCode extends Token {
   constructor(secret, options = {}) {
     const schema = yup.object().noUnknown().shape({
+      client: yup.string().required(),
       credentials: yup.object().required(),
       scope: yupx.scope().required(),
       uri: yup.string().required()

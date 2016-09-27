@@ -33,10 +33,15 @@ server.exchange(oauth2orize.exchange.password(
 ))
 
 server.exchange(oauth2orize.exchange.refreshToken(
-  (client, refreshToken, requestedScope, done) =>
+  (requestedClient, refreshToken, requestedScope, done) =>
     RefreshToken
       .parse(refreshToken)
-      .then(({credentials, scope}) => {
+      .then(({client, credentials, scope}) => {
+
+        if(requestedClient != client) {
+          logger.warn('Client does not match, got `${client}`, expected `${client}`.')
+          return done(null, false)
+        }
 
         if(!isScopeNarrower(scope, requestedScope)) {
           logger.warn(`Requested scope '${requestedScope}' is broader than refresh token scope '${scope}'.`)
@@ -53,11 +58,22 @@ server.exchange(oauth2orize.exchange.refreshToken(
 ))
 
 server.exchange(oauth2orize.exchange.code(
-  (client, code, redirectUri, done) => {
+  (requestedClient, code, redirectUri, done) => {
     AuthorizationCode.parse(code)
-      .then(({ credentials, uri, scope }) => {
-        if(redirectUri != uri) return done(null, false)        
+      .then(({ client, credentials, uri, scope }) => {
+
+        if(requestedClient != client) {
+          logger.warn('Client does not match, got `${client}`, expected `${client}`.')
+          return done(null, false)
+        }
+        
+        if(redirectUri != uri) {
+          logger.warn('Redirect URI does not match, got `${uri}`, expected `${redirectUri}`.')
+          return done(null, false)
+        }
+
         exchangeCredentialsForToken(client, credentials, scope, done)
+
       })
       .catch(err => {
         logger.warn({err}, 'Error parsing authorization code.')
@@ -77,7 +93,7 @@ const exchangeCredentialsForToken = (client, credentials, scope, done) => {
       scope = parseScopes(scope)
       
       const accessToken = { username: credentials.username, client, scope, session }
-      const refreshToken = { credentials, scope }
+      const refreshToken = { client, credentials, scope }
       
       return Promise.all([
         AccessToken.stringify(accessToken),
