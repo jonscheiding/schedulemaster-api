@@ -3,6 +3,7 @@ import express from 'express'
 import { ensureLoggedIn } from 'connect-ensure-login'
 
 import { passport } from 'config'
+import { LOGIN } from './scopes'
 import oauth2orize from './oauth2orize'
 
 const api = express.Router()
@@ -25,7 +26,7 @@ api.use('/token',
 )
 
 api.get('/check',
-  passport.authenticateToken({requiredScope: 'login'}),
+  passport.authenticateToken({ requireScope: LOGIN }),
   (req, res) => res.send(req.user)
 )
 

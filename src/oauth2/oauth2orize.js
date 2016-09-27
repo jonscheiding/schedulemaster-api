@@ -2,7 +2,8 @@ import oauth2orize from 'oauth2orize'
 
 import { logger } from 'logging'
 import { loginPage } from 'pages'
-import { AccessToken, RefreshToken, AuthorizationCode } from 'tokens'
+import { parseScopes, isScopeNarrower } from 'oauth2/scopes'
+import { AccessToken, RefreshToken, AuthorizationCode } from 'oauth2/tokens'
 
 const server = oauth2orize.createServer()
 
@@ -19,7 +20,10 @@ server.grant(oauth2orize.grant.code(
         scope: options.scope
       })
       .then(({codeStr}) => done(null, codeStr))
-      .catch(done)
+      .catch(err => {
+        logger.error({err}, 'Error generating authorization code.')
+        done
+      })
   }
 ))
 
@@ -29,12 +33,23 @@ server.exchange(oauth2orize.exchange.password(
 ))
 
 server.exchange(oauth2orize.exchange.refreshToken(
-  (client, refreshToken, scope, done) =>
+  (client, refreshToken, requestedScope, done) =>
     RefreshToken
       .parse(refreshToken)
-      .then(({credentials}) => 
-        exchangeCredentialsForToken(client, credentials, scope, done))
-      .catch(err => done(null, false, err.toString()))
+      .then(({credentials, scope}) => {
+
+        if(!isScopeNarrower(scope, requestedScope)) {
+          logger.warn(`Requested scope '${requestedScope}' is broader than refresh token scope '${scope}'.`)
+          return done(null, false)
+        }
+
+        exchangeCredentialsForToken(client, credentials, scope, done)
+
+      })
+      .catch(err => {
+        logger.warn({err}, 'Error parsing refresh token.')
+        done(null, false)
+      })
 ))
 
 server.exchange(oauth2orize.exchange.code(
@@ -44,7 +59,10 @@ server.exchange(oauth2orize.exchange.code(
         if(redirectUri != uri) return done(null, false)        
         exchangeCredentialsForToken(client, credentials, scope, done)
       })
-      .catch(err => done(null, false, err))
+      .catch(err => {
+        logger.warn({err}, 'Error parsing authorization code.')
+        done(null, false)
+      })
   }
 ))
 
@@ -52,11 +70,11 @@ const exchangeCredentialsForToken = (client, credentials, scope, done) => {
   loginPage.post(credentials)
     .then(result => {
       if(!result) {
-        done(null, false)
-        return
+        return done(null, false)
       }
       
       const { session, credentials } = result
+      scope = parseScopes(scope)
       
       const accessToken = { username: credentials.username, client, scope, session }
       const refreshToken = { credentials, scope }
@@ -68,9 +86,9 @@ const exchangeCredentialsForToken = (client, credentials, scope, done) => {
         done(null, accessToken.tokenStr, refreshToken.tokenStr, {expires_in: accessToken.expiresIn})
       )
     })
-    .catch(error => {
-      logger.error({err: error})
-      done({error: error.toString()})
+    .catch(err => {
+      logger.error({err}, 'Error logging in to Schedule Master.')
+      done(err)
     })
 }
 

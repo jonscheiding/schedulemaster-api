@@ -4,8 +4,14 @@ import { cleanEnv, str, num } from 'envalid'
 import jwt from 'jsonwebtoken'
 import yup from 'yup'
 
+import { VALID } from 'oauth2/scopes'
+
 const yupx = {
-  scope: () => yup.array().of(yup.string().required())
+  scope: () => yup.array().of(
+    yup.string()
+      .required()
+      .oneOf(VALID)
+  )
 }
 
 const env = cleanEnv(process.env, { 

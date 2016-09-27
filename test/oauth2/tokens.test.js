@@ -4,7 +4,7 @@ import yup from 'yup'
 
 import { expect } from 'test-setup'
 
-import { Token } from 'tokens'
+import { Token } from 'oauth2/tokens'
 
 describe('Token', () => {
   const tokener = new Token('some_secret', { encryptProps: 'secret' })

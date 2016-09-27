@@ -7,7 +7,8 @@ import { Strategy as ClientPasswordStrategy } from 'passport-oauth2-client-passw
 
 import { logger } from 'logging'
 import { loginPage } from 'pages'
-import { AccessToken } from 'tokens'
+import { isScopeNarrower } from 'oauth2/scopes'
+import { AccessToken } from 'oauth2/tokens'
 
 passport.serializeUser((user, done) => done(null, user))
 passport.deserializeUser((user, done) => done(null, user))
@@ -52,9 +53,9 @@ const isValidClient = (username, password, done) => {
 passport.use('client-basic', new BasicStrategy(isValidClient))
 passport.use('client-oauth2-body', new ClientPasswordStrategy(isValidClient))
 
-const requireScope = (scope) => (req, res, next) => {
+const checkRequiredScope = (scope) => (req, res, next) => {
   if(!scope) next()
-  if(!req.user.scope || !req.user.scope.contains(scope)) {
+  if(!isScopeNarrower(req.user.scope, scope)) {
     return res.status(401).send({ message: 'Token is not valid for this resource.' })
   }
   
@@ -65,10 +66,10 @@ export default {
   authenticateClient: (options) => passport.authenticate(['client-basic', 'client-oauth2-body'], options),
   authenticateUser: (options) => passport.authenticate('user', options),
   authenticateToken: (options = {}) => {
-    const { requiredScope, ...otherOptions } = options
+    const { requireScope, ...otherOptions } = options
     return [
       passport.authenticate('token', { session: false, ...otherOptions } ),
-      requireScope(requiredScope)
+      checkRequiredScope(requireScope)
     ]
   },
   initialize: () => [ passport.initialize(), passport.session() ]
