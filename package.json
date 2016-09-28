@@ -15,7 +15,7 @@
     "test:lint": "eslint .",
     "test:mocha": "LOG_LEVEL=FATAL mocha",
     "test:newman": "newman run https://www.getpostman.com/collections/f72792864ca403d39691 -e .env.newman",
-    "start": "rm logs/*.log; nodemon index.js | bunyan"
+    "start": "rm logs/*.log; nodemon -e js,mustache index.js | bunyan"
   },
   "author": "Jon Scheiding",
   "license": "MIT",
