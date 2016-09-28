@@ -1,0 +1,11 @@
+$roboto-font-path: "~materialize-css/fonts/roboto/";
+@import "~materialize-css/sass/components/_color.scss";
+
+$primary-color: color("yellow", "lighten-4");
+$secondary-color: color("indigo", "lighten-1");
+
+body { background-color: $primary-color; }
+.card.alert { background-color: color("materialize-red", "lighten-1"); }
+
+@import "~materialize-css/sass/materialize.scss";
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
