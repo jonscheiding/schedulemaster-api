@@ -45,5 +45,9 @@ api.post('/login',
   (req, res) => res.redirect(req.session.returnTo)
 )
 
+api.get('/logout', (req, res) => {
+  req.logout()
+  res.redirect(req.query.redirect || req.headers.referer)
+})
 
 export default api
