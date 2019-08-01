@@ -42,7 +42,7 @@
     "cheerio": "^0.22.0",
     "connect-ensure-login": "^0.1.1",
     "css-loader": "^0.25.0",
-    "deep-extend": "^0.4.1",
+    "deep-extend": "^0.5.1",
     "deepmerge": "^0.2.10",
     "envalid": "^2.2.0",
     "express": "^4.14.0",
