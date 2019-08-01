@@ -23,7 +23,7 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
     "chai-spies": "^0.7.1",
-    "eslint": "^3.4.0",
+    "eslint": "^4.18.2",
     "mocha": "^3.0.2",
     "mocha-logger": "^1.0.4",
     "newman": "^3.1.0",
