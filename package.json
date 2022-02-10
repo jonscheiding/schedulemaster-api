@@ -55,7 +55,7 @@
     "materialize-css": "^0.97.7",
     "mustache": "^2.2.1",
     "mustache-express": "^1.2.2",
-    "node-sass": "^3.10.0",
+    "node-sass": "^7.0.0",
     "nodemon": "^1.10.2",
     "oauth2orize": "^1.5.0",
     "object-encrypter": "^0.1.3",
